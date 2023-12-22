@@ -56,7 +56,7 @@ function switchToSignup() {
 }
 
 function switchToSignin() {
-  window.location.href="login.html"
+  window.location.href="index.html"
 }
 
 // pushing to github online: git push -u https://github.com/DecentCoder1/Fitness-App.git main
