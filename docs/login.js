@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 // Handle form submission
-app.post('/submit', (req, res) => {
+app.post('/home', (req, res) => {
   // Access form data from req.body
   const { email, password } = req.body;
 
