@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve the HTML file
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/login.html');
+  res.sendFile(__dirname + '/index.html');
 });
 
 // Handle form submission
