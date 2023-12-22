@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Fitness Trainer</title>
+        <link rel="stylesheet" type="text/css" href="signup.css">
+    </head>
+    <body>
+        <h1>Fitness Trainer</h1>
+        <div id="signupBox">
+            <h2>Sign Up</h2>
+            <form action="/submitSignup" method="post">
+                <label for="email">Email</label>
+                <br>
+                <input type="text" id="email" name="email" placeholder="Enter email..." required>
+                <br>
+                <br>
+                <label for="fullName">Full Name</label>
+                <br>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter full name..." required>
+                <br>
+                <br>
+                <label for="password">Password</label>
+                <br>
+                <input type="password" id="password" name="password" placeholder="Enter password..." required>
+                <br>
+                <br>
+                <input type="submit" id="signup" value="SIGN UP">
+            </form>
+            <br>
+            <br>
+            <input type="submit" id="signin" value="ALREADY HAVE AN ACCOUNT?" onclick="switchToSignin()">
+        </div>
+    </body>
+<script src="login.js"></script>
+</html>

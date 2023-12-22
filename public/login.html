@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Fitness Trainer</title>
+        <link rel="stylesheet" type="text/css" href="login.css">
+    </head>
+    <body>
+        <h1>Fitness Trainer</h1>
+        <div id="loginbox">
+            <h2>Log In</h2>
+            <form action="/submit" method="post">
+                <label for="email">Email</label>
+                <br>
+                <input type="text" id="email" name="email" placeholder="Enter email..." required>
+                <br>
+                <br>
+                <label for="password">Password</label>
+                <br>
+                <input type="password" id="password" name="password" placeholder="Enter password..." required>
+                <br>
+                <br>
+                <input type="submit" id="login" value="LOG IN">
+            </form>
+            <input type="submit" id="forgot" value="FORGOT PASSWORD?" onclick="forgotPassword()">
+            <input type="submit" id="signup" value="SIGNUP" onclick="switchToSignup()">
+        </div>
+    </body>
+<script src="login.js"></script>
+</html>
