@@ -2,9 +2,9 @@
     "name": "fitness-trainer",
     "version": "1.0.0",
     "description": "early dev phase",
-    "main": "login.js", // Replace with your main file
+    "main": "login.js",
     "scripts": {
-      "start": "node login.js" // Specify the command to start your app
+      "start": "node login.js"
     },
   
   "dependencies": {
