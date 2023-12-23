@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 
 // Serve static files (e.g., HTML, CSS) from the "public" folder
-app.use(express);
+app.use(express.static('docs'));
 
 // Parse incoming requests with JSON payloads
 app.use(bodyParser.json());
