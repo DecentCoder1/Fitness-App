@@ -2,9 +2,9 @@
     "name": "fitness-trainer",
     "version": "1.0.0",
     "description": "early dev phase",
-    "main": "login.js",
+    "main": "docs/login.js",
     "scripts": {
-      "start": "node login.js"
+      "start": "node docs/login.js"
     },
   "dependencies": {
     "body-parser": "^1.20.2",
