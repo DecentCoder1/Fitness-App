@@ -15,7 +15,7 @@ const client = new MongoClient(uri);
 
 try {
     // Connect to the MongoDB cluster
-    await client.connect();
+    client.connect();
     
 } catch (e) {
     console.error(e);
