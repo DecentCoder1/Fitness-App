@@ -21,12 +21,13 @@ try {
 }
 
 async function main(){
-  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority&directConnection=true";
-  const client = new MongoClient(uri);
+  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
+  const client = new MongoClient(uri, {serverSelectionTimeoutMS: 10000});
 
   try {
       // Connect to the MongoDB cluster
       await client.connect();
+      console.log('Connected to MongoDB');
 
   } catch (e) {
       console.error(e);
