@@ -10,14 +10,12 @@ async function listDatabases(client){
 };
 
 async function main(){
-  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
-  const client = new MongoClient(uri);
+  const client = new MongoClient("mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority");
 
   try {
       // Connect to the MongoDB cluster
       await client.connect();
       return client;
-      console.log('Connected to MongoDB');
 
   } catch (e) {
       console.error(e);
@@ -91,12 +89,24 @@ app.post('/submitSignup', (req, res) => {
   const { email, name, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
-  createListing(client, "logins", {
-        email: email,
-        name: name,
-        password: password
-    }
-);
+  MongoClient("mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority").then(function (db) {
+    //converted
+    db.collection("logins").insertOne({
+      email: email,
+      name: name,
+      password: password
+  }).then(function(data) {
+         console.log(data)
+    }).catch(function (err) {//failure callback
+         console.log(err)
+    });
+}).catch(function (err) {});
+  //createListing(client, "logins", {
+    //    email: email,
+    //    name: name,
+    //    password: password
+    //}
+//);
 
   // Send a response to the client
   res.send('Form submitted successfully!');
