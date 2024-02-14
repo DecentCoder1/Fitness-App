@@ -16,6 +16,7 @@ async function main(){
   try {
       // Connect to the MongoDB cluster
       await client.connect();
+      return client;
       console.log('Connected to MongoDB');
 
   } catch (e) {
@@ -40,7 +41,7 @@ async function findOneListingByName(client, collectionName, nameOfListing) {
   }
 }
 
-main().catch(console.error);
+client = main().catch(console.error);
 
 const app = express();
 const port = 3000;
