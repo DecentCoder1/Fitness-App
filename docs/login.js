@@ -74,7 +74,7 @@ app.post('/home', (req, res) => {
   const { email, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
-  data = findOneListingByName(client, "login", {
+  data = findOneListingByName(client, "logins", {
     email: email
   })
   if (data == 0) {
@@ -97,7 +97,7 @@ app.post('/submitSignup', (req, res) => {
   const { email, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
-  createListing(client, "login", {
+  createListing(client, "logins", {
         email: email,
         password: password
     }
