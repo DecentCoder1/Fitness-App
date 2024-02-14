@@ -89,7 +89,7 @@ app.post('/submitSignup', (req, res) => {
   const { email, name, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
-  MongoClient("mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority").then(function (db) {
+  new MongoClient("mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority").connect().then(function (db) {
     //converted
     db.collection("logins").insertOne({
       email: email,
