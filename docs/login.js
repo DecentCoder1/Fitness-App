@@ -28,48 +28,31 @@ async function main(){
   }
 }
 
+async function createListing(client, collectionName, newListing){
+  const result = await client.db("fitness-app-data").collection(collectionName).insertOne(newListing);
+  console.log(`New listing created with the following id: ${result.insertedId}`);
+}
+
+async function findOneListingByName(client, collectionName, nameOfListing) {
+  const result = await client.db("fitness-app-data").collection(collectionName).findOne({ email: nameOfListing });
+
+  if (result) {
+      return result;
+  } else {
+      return 0;
+  }
+}
+
 main().catch(console.error);
 
 const app = express();
 const port = 3000;
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'RobloxOof2020',
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err.message);
-    return;
-  }
-
-  console.log('Connected to MySQL');
-
-  // Create a new database
-  connection.query('CREATE DATABASE IF NOT EXISTS Fitness_App', (createErr) => {
-    if (createErr) {
-      console.error('Error creating database:', createErr.message);
-    } else {
-      console.log('Database created or already exists');
-
-      // Your code logic goes here
-
-      // Close the database connection
-      connection.end((endErr) => {
-        if (endErr) {
-          console.error('Error closing MySQL connection:', endErr.message);
-        } else {
-          console.log('Connection closed');
-        }
-      });
-    }
-  });
-});
-
-
-
+// const connection = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'RobloxOof2020',
+// });
 
 // Serve static files (e.g., HTML, CSS) from the "public" folder
 app.use(express.static('docs'));
@@ -85,12 +68,24 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// Handle form submission
+// Handle sign in submission
 app.post('/home', (req, res) => {
   // Access form data from req.body
   const { email, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
+  data = findOneListingByName(client, "login", {
+    email: email
+  })
+  if (data == 0) {
+    window.location.href = "signup.html";
+    return 0;
+  } else if (data != 0) {
+    if (data["password"] != password) {
+      console.log("incorrect password");
+      return 0;
+    }
+  }
   console.log('Form submitted with email:', email, 'and password:', password);
 
   // Send a response to the client
@@ -102,7 +97,11 @@ app.post('/submitSignup', (req, res) => {
   const { email, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
-  console.log('Form submitted with email:', email, 'and password:', password);
+  createListing(client, "login", {
+        email: email,
+        password: password
+    }
+);
 
   // Send a response to the client
   res.send('Form submitted successfully!');
