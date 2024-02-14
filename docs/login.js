@@ -21,7 +21,7 @@ try {
 }
 
 async function main(){
-  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
+  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority&directConnection=true";
   const client = new MongoClient(uri);
 
   try {
