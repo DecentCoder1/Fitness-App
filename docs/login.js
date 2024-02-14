@@ -9,20 +9,9 @@ async function listDatabases(client){
   databasesList.databases.forEach(db => console.log(` - ${db.name}`));
 };
 
-const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
-const client = new MongoClient(uri);
-
-try {
-    // Connect to the MongoDB cluster
-    client.connect();
-    
-} catch (e) {
-    console.error(e);
-}
-
 async function main(){
   const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
-  const client = new MongoClient(uri, {serverSelectionTimeoutMS: 10000});
+  const client = new MongoClient(uri);
 
   try {
       // Connect to the MongoDB cluster
