@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql');
 const { MongoClient } = require('mongodb');
 
 async function listDatabases(client){
@@ -21,20 +20,20 @@ try {
     console.error(e);
 }
 
-// async function main(){
-//   const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
-//   const client = new MongoClient(uri);
+async function main(){
+  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
+  const client = new MongoClient(uri);
 
-//   try {
-//       // Connect to the MongoDB cluster
-//       await client.connect();
+  try {
+      // Connect to the MongoDB cluster
+      await client.connect();
 
-//   } catch (e) {
-//       console.error(e);
-//   } finally {
-//       await client.close();
-//   }
-// }
+  } catch (e) {
+      console.error(e);
+  } finally {
+      await client.close();
+  }
+}
 
 async function createListing(client, collectionName, newListing){
   const result = await client.db("fitness-app-data").collection(collectionName).insertOne(newListing);
@@ -51,16 +50,10 @@ async function findOneListingByName(client, collectionName, nameOfListing) {
   }
 }
 
-// main().catch(console.error);
+main().catch(console.error);
 
 const app = express();
 const port = 3000;
-
-// const connection = mysql.createConnection({
-//   host: 'localhost',
-//   user: 'root',
-//   password: 'RobloxOof2020',
-// });
 
 // Serve static files (e.g., HTML, CSS) from the "public" folder
 app.use(express.static('docs'));
