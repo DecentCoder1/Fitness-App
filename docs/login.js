@@ -94,11 +94,12 @@ app.post('/home', (req, res) => {
 
 app.post('/submitSignup', (req, res) => {
   // Access form data from req.body
-  const { email, password } = req.body;
+  const { email, name, password } = req.body;
 
   // Process the form data (e.g., store in a database, perform authentication)
   createListing(client, "logins", {
         email: email,
+        name: name,
         password: password
     }
 );
