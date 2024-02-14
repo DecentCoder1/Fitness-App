@@ -10,23 +10,31 @@ async function listDatabases(client){
   databasesList.databases.forEach(db => console.log(` - ${db.name}`));
 };
 
-async function main(){
-  const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
-  const client = new MongoClient(uri);
+const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
+const client = new MongoClient(uri);
 
-  try {
-      // Connect to the MongoDB cluster
-      await client.connect();
-
-      // Make the appropriate DB calls
-      await  listDatabases(client);
-
-  } catch (e) {
-      console.error(e);
-  } finally {
-      await client.close();
-  }
+try {
+    // Connect to the MongoDB cluster
+    await client.connect();
+    
+} catch (e) {
+    console.error(e);
 }
+
+// async function main(){
+//   const uri = "mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority";
+//   const client = new MongoClient(uri);
+
+//   try {
+//       // Connect to the MongoDB cluster
+//       await client.connect();
+
+//   } catch (e) {
+//       console.error(e);
+//   } finally {
+//       await client.close();
+//   }
+// }
 
 async function createListing(client, collectionName, newListing){
   const result = await client.db("fitness-app-data").collection(collectionName).insertOne(newListing);
@@ -43,7 +51,7 @@ async function findOneListingByName(client, collectionName, nameOfListing) {
   }
 }
 
-main().catch(console.error);
+// main().catch(console.error);
 
 const app = express();
 const port = 3000;
@@ -77,6 +85,8 @@ app.post('/home', (req, res) => {
   data = findOneListingByName(client, "logins", {
     email: email
   })
+
+  // check if password is correct or if account exists
   if (data == 0) {
     window.location.href = "signup.html";
     return 0;
