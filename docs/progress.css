@@ -1,0 +1,126 @@
+body {
+    background-color: #25B396;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#dailyQuest {
+    display: inline-block;
+    border: 2px solid black;
+    width: 190px;
+    min-height: 150px;
+    overflow: hidden;
+}
+
+/*#dailyQuest:nth-child(2) {
+    transform: translate(100px, 100px) scale(2);
+}*/
+
+.progress{
+    position: relative; 
+    margin: 4px;
+    float:left;
+    text-align: center;
+}
+
+.barOverflow{ /* Wraps the rotating .bar */
+    position: relative;
+    width: 180px; height: 90px; /* Half circle (overflow) */
+    margin-bottom: -28px; /* bring the numbers up */
+    overflow: hidden;
+}
+
+.bar{
+    position: absolute;
+    top: 0; left: 0;
+    width: 180px; height: 180px; /* full circle! */
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 25px solid #ffffff;     /* half gray, */
+    border-bottom-color: #FFD300;  /* half azure */
+    border-right-color: #FFD300;
+}
+
+#percentage {
+    font-size: 1.5rem;
+}
+
+
+
+
+
+.container {
+    max-width: 190px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+
+.input-container {
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    margin-top: 10px;
+    float: left;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 8px;
+}
+
+#add {
+    margin-top: 10px;
+    float: right;
+    background-color: #FFD300;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+/*li {
+    display: table;
+    margin-top: 1px;
+    align-items: center;
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+    padding: 1px;
+    margin-bottom: 1px;
+    background-color: #25b396;
+    font-size: 8px;
+}
+*/
+
+.delete button {
+    width: 10px;
+    height: 9px;
+    border: 1px solid black;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.complete:disabled {
+    font-family: 'Impact', 'fantasy', 'Arial Black'; 
+    font-weight: 1000; 
+    font-size: 10px; 
+    color: #25b396; 
+    height: 20px; 
+    width: 20px; 
+    padding: 0px; 
+    margin: 1px;
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 2px;
+}
