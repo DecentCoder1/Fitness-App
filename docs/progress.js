@@ -19,7 +19,7 @@ function animatePercentage(perc) {
     }); 
 }
 
-$(document).ready(animatePercentage(10));
+$(document).ready(animatePercentage(100));
 
 
 const taskInput = document.getElementById("task");
@@ -53,8 +53,10 @@ function createTask(text) {
         deleteBtn.innerHTML="&#10003";
         if (!deleteBtn.disabled) {
             done++;
+            animatePercentage((done/taskList.children.length)*100);
         }
         deleteBtn.disabled = true;
     });
+    animatePercentage((done/taskList.children.length)*100);
 }
 setInterval(function() {animatePercentage((done/taskList.children.length)*100);}, 5000);
