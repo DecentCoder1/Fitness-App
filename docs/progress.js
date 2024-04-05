@@ -1,25 +1,32 @@
 // progress bar stuff done with https://codeconvey.com/semi-circle-progress-bar-css/
 
 function animatePercentage(perc) {
+    if (perc == 101) {
+        perc1 = 0;
+    } else {
+        perc1 = perc;
+    }
     $(".progress").each(function(){
         var $bar = $(this).find(".bar");
         var $val = $(this).find("span");
-        
-        $({p:0}).animate({p:perc}, {
+        $({p:0}).animate({p:perc1}, {
         duration: 1000,
         easing: "swing",
         step: function(p) {
             $bar.css({
-            transform: "rotate("+ (45+(p*1.8)) +"deg)", // 100%=180° so: ° = % * 1.8
-            // 45 is to add the needed rotation to have the green borders at the bottom
+                transform: "rotate("+ (45+(p*1.8)) +"deg)", // 100%=180° so: ° = % * 1.8
+                // 45 is to add the needed rotation to have the green borders at the bottom
             });
-            $val.text(p|0);
+            $val.text((perc1 + "%"));
+            if (perc === 101) {
+                $val.text("No Tasks Yet");
+            }
         }
         });
     }); 
 }
 
-$(document).ready(animatePercentage(100));
+$(document).ready(animatePercentage(101));
 
 
 const taskInput = document.getElementById("task");
@@ -59,4 +66,3 @@ function createTask(text) {
     });
     animatePercentage((done/taskList.children.length)*100);
 }
-setInterval(function() {animatePercentage((done/taskList.children.length)*100);}, 5000);

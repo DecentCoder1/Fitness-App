@@ -4,11 +4,15 @@ body {
 }
 
 #dailyQuest {
-    display: inline-block;
+    position: fixed;
     border: 2px solid black;
     width: 190px;
     min-height: 150px;
     overflow: hidden;
+    left: 50%;
+    top: 0%;
+    transform: translateX(-50%); /* Center the bar perfectly */
+    zoom: 150%;
 }
 
 /*#dailyQuest:nth-child(2) {
@@ -20,6 +24,7 @@ body {
     margin: 4px;
     float:left;
     text-align: center;
+    margin-bottom: 10px;
 }
 
 .barOverflow{ /* Wraps the rotating .bar */
@@ -41,11 +46,8 @@ body {
 }
 
 #percentage {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
-
-
-
 
 
 .container {
