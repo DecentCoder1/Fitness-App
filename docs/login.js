@@ -64,16 +64,14 @@ app.post('/home', (req, res) => {
 
 app.post('/submitSignup', (req, res) => {
   // Access form data from req.body
-  const { email, name, password } = req.body;
-
-  console.log(req.body);
+  const { email, fullName, password } = req.body;
 
   async function checkMongoDBConnection() {
     try {
         await client.connect();
         console.log("Connected to MongoDB");
         const cursor = client.db("fitness-app-data").collection("logins");
-        const doc = { email: email, name: name, password: password };
+        const doc = { email: email, name: fullName, password: password };
         await cursor.insertOne(doc);
         console.log("successful");
         res.send("successful");
