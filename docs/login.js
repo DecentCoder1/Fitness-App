@@ -66,6 +66,8 @@ app.post('/submitSignup', (req, res) => {
   // Access form data from req.body
   const { email, name, password } = req.body;
 
+  console.log(name);
+
   async function checkMongoDBConnection() {
     try {
         await client.connect();
