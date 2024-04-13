@@ -85,26 +85,6 @@ app.post('/submitSignup', (req, res) => {
   }
   checkMongoDBConnection();
 
-  // Process the form data (e.g., store in a database, perform authentication)
-  new MongoClient("mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/?retryWrites=true&w=majority").connect().then(function (db) {
-    //converted
-    db.collection("logins").insertOne({
-      email: email,
-      name: name,
-      password: password
-  }).then(function(data) {
-         console.log(data)
-    }).catch(function (err) {//failure callback
-         console.log(err)
-    });
-}).catch(function (err) {});
-  //createListing(client, "logins", {
-    //    email: email,
-    //    name: name,
-    //    password: password
-    //}
-//);
-
   // Send a response to the client
   res.send('Form submitted successfully!');
 });
