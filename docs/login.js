@@ -62,6 +62,11 @@ app.post('/home', (req, res) => {
   console.log('Form submitted with email:', email, 'and password:', password);
 });
 
+// fixe submitSignup going nowhere
+app.get('/submitSignup', function (req, res) {
+  res.sendFile(__dirname + '/preference.html')
+})
+
 app.post('/submitSignup', (req, res) => {
   // Access form data from req.body
   const { email, fullName, password } = req.body;
@@ -71,10 +76,11 @@ app.post('/submitSignup', (req, res) => {
         await client.connect();
         console.log("Connected to MongoDB");
         const cursor = client.db("fitness-app-data").collection("logins");
-        const doc = { email: email, name: fullName, password: password };
+        const doc = { email: email, name: fullName, password: password};
         await cursor.insertOne(doc);
         console.log("successful");
         res.send("successful");
+        sessionStorage.setItem('email', email);
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
     } finally {

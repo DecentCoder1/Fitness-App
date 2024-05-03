@@ -6,12 +6,34 @@ document.getElementById('submitButton').addEventListener("click", function() {
     onSubmit();
  });
 
-function onSubmit() {
+async function onSubmit() {
     let checkboxes = document.getElementsByName('preference');
     for (var i = 0; i < checkboxes.length; i++) {
         if (checkboxes[i].checked) {
             chosen.push(i);
         }
+    }
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var userEmail = sessionStorage.getItem('email');
+        await cursor.update(
+            { email: userEmail },
+            {
+              $set: {
+                preferences: chosen.toString()
+              }
+            }
+         )
+        console.log("successful");
+        res.send("successful");
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
     }
     document.location.href = "profile.html";
     do {
@@ -21,11 +43,29 @@ function onSubmit() {
 
 // things added to chosen is not carried over to profile.html (bottom function)
 
-function updatePreference(chosen) {
-    ul = document.getElementById("preferenceList");
-    for (var i=0; i<chosen.length;i++) {
-        var li = document.createElement('li');
-        li.innerHTML = excerciseList[chosen[i]];
-        ul.appendChild(li);
+async function updatePreference(chosen) {
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
+        for await (const doc of cursor1) {
+            // check if password is correct or if account exists
+            var preferencesList = doc.preferences.split(",")
+            console.log(preferencesList);
+            var ul = document.getElementById("preferenceList");
+            for (var i=0; i<preferencesList.length;i++) {
+                var li = document.createElement('li');
+                li.innerHTML = excerciseList[preferencesList[i]];
+                ul.appendChild(li);
+            }
+
+          }
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
     }
 }
