@@ -115,10 +115,17 @@ function switchToSignin() {
   window.location.href="index.html"
 }
 
+// add goal page (user enters goal)
+// create a new signup in the signup page (to choose whether a coach or user)
 // add a list of buttons for different exercise types (saves time for communication)
 // coach can see the excercise type summary for each user
 // user enter availability and match with the gym's time
+// reminder one day before and one hour before, for coaches added reviews
+// profile page add about for coaches
+// pass data through url (use ids like numbers instead of email)
 // sizing issues
+
+// flow: signin -> signup -> main page (dashboard) -> choose excercise in profile page ltr on (can also group excercises such as upper, lower body)
 
 
 // pushing to github online: git push -u https://github.com/DecentCoder1/Fitness-App.git main
