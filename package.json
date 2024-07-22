@@ -8,6 +8,8 @@
     },
     "dependencies": {
         "body-parser": "^1.20.2",
+        "ejs": "^3.1.10",
+        "express-session": "^1.18.0",
         "express.js": "^1.0.0",
         "mongodb": "^6.3.0"
     }

@@ -1,86 +1,196 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+document.addEventListener("DOMContentLoaded", function() {
+  const currentPath = window.location.pathname;
 
-const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/';
-const client = new MongoClient(uri);
-
-const app = express();
-const port = 3000;
-
-// Serve static files (e.g., HTML, CSS) from the "public" folder
-app.use(express.static('docs'));
-
-// Parse incoming requests with JSON payloads
-app.use(bodyParser.json());
-
-// Parse incoming requests with urlencoded payloads
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Serve the HTML file
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
-// Handle sign in submission
-app.post('/home', (req, res) => {
-  // Access form data from req.body
-  const { email, password } = req.body;
-
-  // Process the form data (e.g., store in a database, perform authentication)
-  async function checkMongoDBConnection() {
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        // access the collection
-        const cursor = client.db("fitness-app-data").collection("logins");
-        const cursor1 = cursor.find({email: email});
-        // logging all results that match
-        for await (const doc of cursor1) {
-          // check if password is correct or if account exists
-          if (doc.password == password) {
-            console.log("successful");
-            res.send("Logged In!");
-            window.location.href = "progress.html";
-          } else {
-            console.log("unsuccessful");
-            res.send("Something went wrong");
-          }
-        }
-        // logging all results that match can also be done like this
-        // await cursor.forEach(console.log);
-        
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
+  if (currentPath.endsWith("index.html")) {
+    runIndex();
+  } else if (currentPath.endsWith("signup.html")) {
+    runSignup();
+  } else if (currentPath.endsWith("progress.html")) {
+    runProgress();
+  } else if (currentPath.endsWith("profile.html")) {
+    runProfile();
+  } else if (currentPath.endsWith("composition.html")) {
+    runComposition();
+  } else if (currentPath.endsWith("preference.html")) {
+    runPreference();
   }
-  checkMongoDBConnection();
-  console.log('Form submitted with email:', email, 'and password:', password);
 });
 
-// fixe submitSignup going nowhere
-app.get('/submitSignup', function (req, res) {
-  res.sendFile(__dirname + '/preference.html')
-})
+function fetchUserId(callback) {
+  fetch('/getUserId')
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error('Not logged in');
+      }
+    })
+    .then(data => {
+      window.userId = data.userId; // Store userId globally
+      callback();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      window.location.href = '/';
+    });
+}
 
-app.post('/submitSignup', (req, res) => {
-  // Access form data from req.body
-  const { email, fullName, password } = req.body;
+function runIndex() {
+  console.log("Running index.js code");
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-  async function checkMongoDBConnection() {
+    fetch('/home', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    .then(response => response.text())
+    .then(data => {
+      if (data === "Invalid email or password") {
+        alert(data);
+      } else {
+        window.location.href = '/progress';
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+}
+
+function runSignup() {
+  console.log("Running signup.js code");
+  document.getElementById('signupForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const fullName = document.getElementById('fullName').value;
+    const password = document.getElementById('password').value;
+    const coach = document.getElementById('coach').checked;
+
+    fetch('/submitSignup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, fullName, password, coach })
+    })
+    .then(response => response.text())
+    .then(data => {
+      alert(data);
+      window.location.href = '/';
+    })
+    .catch(error => console.error('Error:', error));
+  });
+}
+
+function runProgress() {
+  console.log("UserId:", window.userId);
+  // progress bar stuff done with https://codeconvey.com/semi-circle-progress-bar-css/
+
+
+// Access the userId passed from the server
+const userId = "<%= userId %>";
+console.log("User ID:", userId);
+
+function animatePercentage(perc) {
+    if (perc == 101) {
+        perc1 = 0;
+    } else {
+        perc1 = perc;
+    }
+    $(".progress").each(function(){
+        var $bar = $(this).find(".bar");
+        var $val = $(this).find("span");
+        $({p:0}).animate({p:perc1}, {
+        duration: 1000,
+        easing: "swing",
+        step: function(p) {
+            $bar.css({
+                transform: "rotate("+ (45+(p*1.8)) +"deg)", // 100%=180° so: ° = % * 1.8
+                // 45 is to add the needed rotation to have the green borders at the bottom
+            });
+            $val.text((perc1 + "%"));
+            if (perc === 101) {
+                $val.text("No Tasks Yet");
+            }
+        }
+        });
+    }); 
+}
+
+$(document).ready(animatePercentage(101));
+
+
+const taskInput = document.getElementById("task");
+const addBtn = document.getElementById("add");
+const taskList = document.getElementById("taskList");
+let done = 0;
+
+// Add task
+addBtn.addEventListener("click", () => {
+    const taskText = taskInput.value.trim();
+    if (taskText !== "") {
+        createTask(taskText);
+        taskInput.value = "";
+    }
+});
+
+// Create a new task
+function createTask(text) {
+    const taskItem = document.createElement("li");
+    taskItem.innerHTML = `
+        <div style="margin-top: 1px; margin-bottom: 1px; background-color: #FFD300; display: table; align-items: center; border-radius: 4px; min-width: 100px;width: fit-content; height: 20px; border: 1px solid black; ">
+        <button class="complete" style="border-radius: 2px; border: 1px solid gray; background-color: white; font-family: 'Impact', 'fantasy', 'Arial Black'; font-weight: 1000; font-size: 10px; color: #25b396; height: 20px; width: 20px; padding: 0px; margin: 1px;"></button>
+        <span style="position: relative; font-size: 16px; ">${text}</span>
+        </div>
+    `;
+    taskList.appendChild(taskItem);
+
+    // Delete task
+    const deleteBtn = taskItem.querySelector(".complete");
+    deleteBtn.addEventListener("click", () => {
+        deleteBtn.innerHTML="&#10003";
+        if (!deleteBtn.disabled) {
+            done++;
+            animatePercentage((done/taskList.children.length)*100);
+        }
+        deleteBtn.disabled = true;
+    });
+    animatePercentage((done/taskList.children.length)*100);
+}
+}
+
+function runProfile() {
+  console.log("UserId:", window.userId);
+  let chosen = new Array(0);
+
+const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
+
+document.getElementById('submitButton').addEventListener("click", function() {
+    onSubmit();
+ });
+
+async function onSubmit() {
+    let checkboxes = document.getElementsByName('preference');
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            chosen.push(i);
+        }
+    }
     try {
         await client.connect();
         console.log("Connected to MongoDB");
         const cursor = client.db("fitness-app-data").collection("logins");
-        const doc = { email: email, name: fullName, password: password};
-        await cursor.insertOne(doc);
+        var userEmail = sessionStorage.getItem('email');
+        await cursor.update(
+            { email: userEmail },
+            {
+              $set: {
+                preferences: chosen.toString()
+              }
+            }
+         )
         console.log("successful");
         res.send("successful");
-        sessionStorage.setItem('email', email);
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
     } finally {
@@ -88,45 +198,149 @@ app.post('/submitSignup', (req, res) => {
     await client.close();
     console.log("Connection closed");
     }
+    document.location.href = "profile.html";
+    do {
+       updatePreference(chosen);
+    } while(document.location.href !== "profile.html");
+}
+
+// things added to chosen is not carried over to profile.html (bottom function)
+
+async function updatePreference(chosen) {
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
+        for await (const doc of cursor1) {
+            // check if password is correct or if account exists
+            var preferencesList = doc.preferences.split(",")
+            console.log(preferencesList);
+            var ul = document.getElementById("preferenceList");
+            for (var i=0; i<preferencesList.length;i++) {
+                var li = document.createElement('li');
+                li.innerHTML = excerciseList[preferencesList[i]];
+                ul.appendChild(li);
+            }
+
+          }
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+}
+}
+
+function runComposition() {
+  console.log("UserId:", window.userId);
+  // Get reference to the wrapper div
+var wrapperDiv = document.getElementById('q1'); // all the way to q10
+
+// Get all radio buttons inside the wrapper div
+var radioButtons = wrapperDiv.querySelectorAll('input[type="radio"][name="yes_no"]');
+
+// Variable to store the selected value
+var selectedValue;
+
+// Loop through radio buttons to find the checked one
+radioButtons.forEach(function(radioButton) {
+  if (radioButton.checked) {
+    selectedValue = radioButton.value;
   }
-  checkMongoDBConnection();
-
-  // Send a response to the client
-  res.send('Form submitted successfully!');
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+// Now selectedValue contains the value of the selected radio button
+console.log(selectedValue);
 
+}
+
+function runPreference() {
+  console.log("UserId:", window.userId);
+  let chosen = new Array(0);
+
+const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
+
+document.getElementById('submitButton').addEventListener("click", function() {
+    onSubmit();
+ });
+
+async function onSubmit() {
+    let checkboxes = document.getElementsByName('preference');
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            chosen.push(i);
+        }
+    }
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var userEmail = sessionStorage.getItem('email');
+        await cursor.update(
+            { email: userEmail },
+            {
+              $set: {
+                preferences: chosen.toString()
+              }
+            }
+         )
+        console.log("successful");
+        res.send("successful");
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+    document.location.href = "profile.html";
+    do {
+       updatePreference(chosen);
+    } while(document.location.href !== "profile.html");
+}
+
+// things added to chosen is not carried over to profile.html (bottom function)
+
+async function updatePreference(chosen) {
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
+        for await (const doc of cursor1) {
+            // check if password is correct or if account exists
+            var preferencesList = doc.preferences.split(",")
+            console.log(preferencesList);
+            var ul = document.getElementById("preferenceList");
+            for (var i=0; i<preferencesList.length;i++) {
+                var li = document.createElement('li');
+                li.innerHTML = excerciseList[preferencesList[i]];
+                ul.appendChild(li);
+            }
+
+          }
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+}
+}
 
 
 function forgotPassword() {
   // implement forgotPassword
 }
 
-
 function switchToSignup() {
     window.location.href="signup.html";
 }
 
 function switchToSignin() {
-  window.location.href="index.html"
+  window.location.href="index.html";
 }
-
-// add goal page (user enters goal)
-// create a new signup in the signup page (to choose whether a coach or user)
-// add a list of buttons for different exercise types (saves time for communication)
-// coach can see the excercise type summary for each user
-// user enter availability and match with the gym's time
-// reminder one day before and one hour before, for coaches added reviews
-// profile page add about for coaches
-// pass data through url (use ids like numbers instead of email)
-// sizing issues
-
-// flow: signin -> signup -> main page (dashboard) -> choose excercise in profile page ltr on (can also group excercises such as upper, lower body)
-
-
-// pushing to github online: git push -u https://github.com/DecentCoder1/Fitness-App.git main
-// connecting to mongodb playground: mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/

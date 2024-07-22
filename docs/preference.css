@@ -51,3 +51,17 @@ button:hover {
     font-size: 24px;
     background-color:#c8bdbd90;
 }
+
+#leftPanel {
+    float: left;
+    text-align: center;
+}
+
+#rightPanel {
+    float: right;
+}
+
+#about, #aboutMe {
+    text-align: left;
+    margin-left: 15px;
+}

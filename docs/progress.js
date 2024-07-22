@@ -1,5 +1,10 @@
 // progress bar stuff done with https://codeconvey.com/semi-circle-progress-bar-css/
 
+
+// Access the userId passed from the server
+const userId = "<%= userId %>";
+console.log("User ID:", userId);
+
 function animatePercentage(perc) {
     if (perc == 101) {
         perc1 = 0;
