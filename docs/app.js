@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
+const session = require('express-session');
 const path = require('path');
-const MongoDBStore = require('connect-mongodb-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fitness-app-data?retryWrites=true&w=majority';
 const client = new MongoClient(uri);
