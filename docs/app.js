@@ -5,7 +5,7 @@ const session = require('express-session');
 const path = require('path');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
-const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fitness-app-data?retryWrites=true&w=majority';
+const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/';
 const client = new MongoClient(uri);
 
 const app = express();
