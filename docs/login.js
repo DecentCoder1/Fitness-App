@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", function() {
     runComposition();
   } else if (currentPath.endsWith("preference.html")) {
     runPreference();
+  } else if (currentPath.endsWith("scheduling.html")) {
+    runScheduling();
   }
 });
 
@@ -36,7 +38,6 @@ function fetchUserId(callback) {
 }
 
 function runIndex() {
-  console.log("Running index.js code");
   document.getElementById('loginForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
@@ -60,7 +61,6 @@ function runIndex() {
 }
 
 function runSignup() {
-  console.log("Running signup.js code");
   document.getElementById('signupForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
@@ -330,6 +330,83 @@ async function updatePreference(chosen) {
     console.log("Connection closed");
     }
 }
+}
+
+function runScheduling() {
+  console.log("UserId:", window.userId);
+  const calendar = document.querySelector('.calendar');
+
+        // Days of the week for data-day attribute
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        // Initialize the nested array to track active cells
+        const activeCells = Array.from({ length: 7 }, () => []);
+
+        let isMouseDown = false;
+
+        // Function to handle toggling cell active state
+        function toggleCellActive(cell) {
+            // Get day and hour
+            const day = cell.getAttribute('data-day');
+            const hour = cell.getAttribute('data-hour');
+            const dayIndex = daysOfWeek.indexOf(day);
+
+            // Toggle the 'active' class to light up the cell
+            cell.classList.toggle('active');
+
+            // Update the nested array based on the active state
+            if (cell.classList.contains('active')) {
+                activeCells[dayIndex].push(hour);
+            } else {
+                activeCells[dayIndex] = activeCells[dayIndex].filter(h => h !== hour);
+            }
+
+            // Sort times from earliest to latest
+            activeCells[dayIndex].sort((a, b) => {
+                const [startA] = a.split(':');
+                const [startB] = b.split(':');
+                return Number(startA[0]) - Number(startB[0]);
+            });
+        }
+
+        // Loop through 24 hours and 7 days to create cells
+        for (let hour = 0; hour < 24; hour++) {
+            for (let day = 0; day < 7; day++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell', 'clickable');
+                cell.setAttribute('data-day', daysOfWeek[day]);
+                cell.setAttribute('data-hour', `${hour}:00-${hour + 1}:00`);
+                cell.textContent = `${hour}:00-${hour + 1}:00`;
+                calendar.appendChild(cell);
+
+                // Add event listener to handle click event
+                cell.addEventListener('mousedown', function() {
+                    isMouseDown = true;
+                    toggleCellActive(this);
+                });
+
+                cell.addEventListener('mouseover', function() {
+                    if (isMouseDown) {
+                        toggleCellActive(this);
+                    }
+                });
+            }
+        }
+
+        // Add event listeners to handle mouse up event
+        document.addEventListener('mouseup', function() {
+            isMouseDown = false;
+        });
+
+        // Function to get the nested array of active cells
+        function getActiveCells() {
+            return activeCells;
+        }
+
+        // Add event listener to the button to log the active cells
+        document.getElementById('get-active-cells').addEventListener('click', function() {
+            console.log(getActiveCells());
+        });
 }
 
 

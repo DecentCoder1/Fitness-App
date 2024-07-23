@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 const path = require('path');
 
 const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/';
@@ -13,10 +14,22 @@ const port = 3000;
 // Use a manually defined secret key
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy'; // Replace with a strong, random string
 
+// Create a MongoDB session store
+const store = new MongoDBStore({
+  uri: uri,
+  collection: 'mySessions'
+});
+
+// Catch errors
+store.on('error', function(error) {
+  console.error(error);
+});
+
 app.use(session({
   secret: secretKey,
   resave: false,
   saveUninitialized: true,
+  store: store,
   cookie: { secure: false }
 }));
 

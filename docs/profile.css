@@ -1,0 +1,28 @@
+#leftPanel {
+    float: left;
+    text-align: center;
+    width: 50%;
+    height: 50%;
+}
+
+#rightPanel {
+    float: right;
+    width: 50%;
+    text-align: left;
+    height: 50%;
+}
+
+#bottomLeft {
+    float: left;
+    height: 50%;
+}
+
+#main {
+    text-align: center;
+    width: 40%;
+}
+
+#aboutMe {
+    text-align: left;
+    margin-left: 15px;
+}

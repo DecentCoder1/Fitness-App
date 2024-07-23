@@ -3,23 +3,28 @@
     <head>
         <meta charset="utf-8">
         <title>Fitness Trainer - Profile</title>
-        <link rel="stylesheet" type="text/css" href="preference.css">
+        <link rel="stylesheet" type="text/css" href="profile.css">
     </head>
     <body>
         <div id="leftPanel">
-            <h1 id="coach">Coach</h1>
-            <img src="profile_icon.png" alt="profile icon" width="224.5" height="200">
-            <h1 id="username">Name</h1>
-            <h1 id="about">About</h1>
-            <h2 id="aboutMe">I am ...</h1>
+            <div id="main">
+                <img src="profile_icon.png" id="icon" alt="profile icon" width="224.5" height="200">
+                <h1 id="username">Name <label>[Coach]</label></h1>
+            </div>
+            <hr>
+            <div id="bottomLeft">
+                <h2 id="aboutMe">I am ...</h1>
+            </div>
         </div>
         <div id="rightPanel">
+            <button>Schedule A Meeting</button>
             <h1>Preferences</h1>
             <ul id="preferenceList"></ul>
         </div>
+        <hr>
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="preference.js"></script>
+    <script src="login.js"></script>
 </html>
 
 
