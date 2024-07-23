@@ -1,11 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const session = require('express-session');
 const { MongoClient } = require('mongodb');
-const MongoDBStore = require('connect-mongodb-session')(session);
+const session = require('express-session');
 const path = require('path');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
-const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/';
+const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fitness-app-data?retryWrites=true&w=majority';
 const client = new MongoClient(uri);
 
 const app = express();
@@ -14,15 +14,13 @@ const port = 3000;
 // Use a manually defined secret key
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy'; // Replace with a strong, random string
 
-// Create a MongoDB session store
 const store = new MongoDBStore({
   uri: uri,
-  collection: 'mySessions'
+  collection: 'sessions'
 });
 
-// Catch errors
-store.on('error', function(error) {
-  console.error(error);
+store.on('error', function (error) {
+  console.error('Session store error:', error);
 });
 
 app.use(session({
@@ -75,30 +73,6 @@ app.get('/progress', (req, res) => {
   }
 });
 
-app.get('/profile', (req, res) => {
-  if (!req.session.userId) {
-    res.redirect('/');
-  } else {
-    res.sendFile(path.join(__dirname, 'profile.html'));
-  }
-});
-
-app.get('/composition', (req, res) => {
-  if (!req.session.userId) {
-    res.redirect('/');
-  } else {
-    res.sendFile(path.join(__dirname, 'composition.html'));
-  }
-});
-
-app.get('/preference', (req, res) => {
-  if (!req.session.userId) {
-    res.redirect('/');
-  } else {
-    res.sendFile(path.join(__dirname, 'preference.html'));
-  }
-});
-
 app.get('/submitSignup', (req, res) => {
   res.sendFile(path.join(__dirname, 'signup.html'));
 });
@@ -119,15 +93,18 @@ app.post('/submitSignup', async (req, res) => {
   }
 });
 
-// New route to get the userId from the session
-app.get('/getUserId', (req, res) => {
-  if (req.session.userId) {
-    res.json({ userId: req.session.userId });
-  } else {
-    res.status(401).send('Not logged in');
-  }
-});
-
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+function forgotPassword() {
+  // implement forgotPassword
+}
+
+function switchToSignup() {
+  window.location.href = "signup.html";
+}
+
+function switchToSignin() {
+  window.location.href = "index.html";
+}
