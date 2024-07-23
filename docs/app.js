@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 const { MongoClient } = require('mongodb');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const path = require('path');
