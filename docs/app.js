@@ -2,15 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
 const path = require('path');
-const MongoDBStore = require('connect-mongodb-session')(session);
 
-var store = new MongoDBStore({
-    uri: 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/', 
-    collection: 'sessions'
-})
-const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/';
+// MongoDB client setup
+const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fitness-app-data?retryWrites=true&w=majority';
 const client = new MongoClient(uri);
+
+// Redis client setup
+const redisClient = redis.createClient({
+  host: 'localhost', // replace with your Redis server host
+  port: 6379 // replace with your Redis server port
+});
 
 const app = express();
 const port = 3000;
@@ -18,24 +22,13 @@ const port = 3000;
 // Use a manually defined secret key
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy'; // Replace with a strong, random string
 
-var store = new MongoDBStore({
-  uri: uri,
-  collection: 'sessions'
-});
-
-store.on('error', function (error) {
-  console.error('Session store error:', error);
-});
-
-app.use(require('express-session')({
-    secret: 'This is a secret',
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24 // 1 week
-    },
-    store: store,
-    resave: true,
-    saveUninitialized: true
-  }));
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: secretKey,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
 
 app.use(express.static(path.join(__dirname))); // Serve static files from the root directory
 app.use(bodyParser.json());
@@ -45,6 +38,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname)); // Use the root directory for views
 
+// Middleware to handle database connection
+app.use(async (req, res, next) => {
+  if (!client.isConnected()) {
+    await client.connect();
+  }
+  req.db = client.db("fitness-app-data");
+  next();
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -53,8 +55,7 @@ app.post('/home', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    await client.connect();
-    const cursor = client.db("fitness-app-data").collection("logins");
+    const cursor = req.db.collection("logins");
     const user = await cursor.findOne({ email: email });
 
     if (user && user.password === password) {
@@ -64,10 +65,8 @@ app.post('/home', async (req, res) => {
       res.send("Invalid email or password");
     }
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('Error during login:', error);
     res.status(500).send('Internal Server Error');
-  } finally {
-    await client.close();
   }
 });
 
@@ -87,30 +86,15 @@ app.post('/submitSignup', async (req, res) => {
   const { email, fullName, password, coach } = req.body;
 
   try {
-    await client.connect();
-    const cursor = client.db("fitness-app-data").collection("logins");
+    const cursor = req.db.collection("logins");
     await cursor.insertOne({ email: email, name: fullName, password: password, userType: coach ? "coach" : "user" });
     res.redirect('/');
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('Error during signup:', error);
     res.status(500).send('Internal Server Error');
-  } finally {
-    await client.close();
   }
 });
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
-function forgotPassword() {
-  // implement forgotPassword
-}
-
-function switchToSignup() {
-  window.location.href = "signup.html";
-}
-
-function switchToSignin() {
-  window.location.href = "index.html";
-}
