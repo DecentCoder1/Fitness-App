@@ -19,7 +19,12 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function fetchUserId(callback) {
-  fetch('/getUserId')
+  const token = localStorage.getItem('token');
+  fetch('/getUserId', {
+    headers: {
+      'Authorization': token
+    }
+  })
     .then(response => {
       if (response.ok) {
         return response.json();
@@ -48,12 +53,13 @@ function runIndex() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
-    .then(response => response.text())
+    .then(response => response.json())
     .then(data => {
-      if (data === "Invalid email or password") {
-        alert(data);
-      } else {
+      if (data.token) {
+        localStorage.setItem('token', data.token);
         window.location.href = '/progress';
+      } else {
+        alert(data);
       }
     })
     .catch(error => console.error('Error:', error));
@@ -83,15 +89,15 @@ function runSignup() {
 }
 
 function runProgress() {
+  const token = localStorage.getItem('token');
   console.log("UserId:", window.userId);
   // progress bar stuff done with https://codeconvey.com/semi-circle-progress-bar-css/
 
+  // Access the userId passed from the server
+  const userId = "<%= userId %>";
+  console.log("User ID:", userId);
 
-// Access the userId passed from the server
-const userId = "<%= userId %>";
-console.log("User ID:", userId);
-
-function animatePercentage(perc) {
+  function animatePercentage(perc) {
     if (perc == 101) {
         perc1 = 0;
     } else {
@@ -118,7 +124,6 @@ function animatePercentage(perc) {
 }
 
 $(document).ready(animatePercentage(101));
-
 
 const taskInput = document.getElementById("task");
 const addBtn = document.getElementById("add");
@@ -148,276 +153,116 @@ function createTask(text) {
     // Delete task
     const deleteBtn = taskItem.querySelector(".complete");
     deleteBtn.addEventListener("click", () => {
-        deleteBtn.innerHTML="&#10003";
-        if (!deleteBtn.disabled) {
-            done++;
-            animatePercentage((done/taskList.children.length)*100);
-        }
-        deleteBtn.disabled = true;
+        deleteBtn.innerHTML="&#10003;"
+        taskItem.remove();
+        done -= 1;
+        animatePercentage(100*done/total);
     });
-    animatePercentage((done/taskList.children.length)*100);
+
+    total += 1;
+    done += 1;
+    animatePercentage(100*done/total);
 }
 }
 
 function runProfile() {
   console.log("UserId:", window.userId);
-  let chosen = new Array(0);
+  const userId = window.userId;
 
-const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
+  const genderChart = new Chart(document.getElementById('genderChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Male', 'Female', 'Other'],
+      datasets: [{
+        label: 'Gender',
+        data: [50, 50, 0],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+      }],
+    },
+  });
 
-document.getElementById('submitButton').addEventListener("click", function() {
-    onSubmit();
- });
+  const ageChart = new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Under 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+      datasets: [{
+        label: 'Age',
+        data: [5, 10, 15, 20, 10, 5, 2],
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      }],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 
-async function onSubmit() {
-    let checkboxes = document.getElementsByName('preference');
-    for (var i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked) {
-            chosen.push(i);
-        }
-    }
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var userEmail = sessionStorage.getItem('email');
-        await cursor.update(
-            { email: userEmail },
-            {
-              $set: {
-                preferences: chosen.toString()
-              }
-            }
-         )
-        console.log("successful");
-        res.send("successful");
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-    document.location.href = "profile.html";
-    do {
-       updatePreference(chosen);
-    } while(document.location.href !== "profile.html");
-}
-
-// things added to chosen is not carried over to profile.html (bottom function)
-
-async function updatePreference(chosen) {
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
-        for await (const doc of cursor1) {
-            // check if password is correct or if account exists
-            var preferencesList = doc.preferences.split(",")
-            console.log(preferencesList);
-            var ul = document.getElementById("preferenceList");
-            for (var i=0; i<preferencesList.length;i++) {
-                var li = document.createElement('li');
-                li.innerHTML = excerciseList[preferencesList[i]];
-                ul.appendChild(li);
-            }
-
-          }
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-}
+  const weightChart = new Chart(document.getElementById('weightChart'), {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+      datasets: [{
+        label: 'Weight',
+        data: [200, 195, 190, 185, 180, 175, 170],
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: false,
+        },
+      },
+    },
+  });
 }
 
 function runComposition() {
   console.log("UserId:", window.userId);
-  // Get reference to the wrapper div
-var wrapperDiv = document.getElementById('q1'); // all the way to q10
+  const userId = window.userId;
 
-// Get all radio buttons inside the wrapper div
-var radioButtons = wrapperDiv.querySelectorAll('input[type="radio"][name="yes_no"]');
+  const compositionData = {
+    labels: ['Fat', 'Muscle', 'Bone', 'Water'],
+    datasets: [{
+      label: 'Body Composition',
+      data: [20, 50, 10, 20],
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+    }],
+  };
 
-// Variable to store the selected value
-var selectedValue;
-
-// Loop through radio buttons to find the checked one
-radioButtons.forEach(function(radioButton) {
-  if (radioButton.checked) {
-    selectedValue = radioButton.value;
-  }
-});
-
-// Now selectedValue contains the value of the selected radio button
-console.log(selectedValue);
-
+  const compositionChart = new Chart(document.getElementById('compositionChart'), {
+    type: 'doughnut',
+    data: compositionData,
+  });
 }
 
 function runPreference() {
   console.log("UserId:", window.userId);
-  let chosen = new Array(0);
+  const userId = window.userId;
 
-const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
+  const preferenceData = {
+    labels: ['Cardio', 'Strength', 'Flexibility', 'Balance'],
+    datasets: [{
+      label: 'Exercise Preferences',
+      data: [25, 50, 15, 10],
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+    }],
+  };
 
-document.getElementById('submitButton').addEventListener("click", function() {
-    onSubmit();
- });
-
-async function onSubmit() {
-    let checkboxes = document.getElementsByName('preference');
-    for (var i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked) {
-            chosen.push(i);
-        }
-    }
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var userEmail = sessionStorage.getItem('email');
-        await cursor.update(
-            { email: userEmail },
-            {
-              $set: {
-                preferences: chosen.toString()
-              }
-            }
-         )
-        console.log("successful");
-        res.send("successful");
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-    document.location.href = "profile.html";
-    do {
-       updatePreference(chosen);
-    } while(document.location.href !== "profile.html");
-}
-
-// things added to chosen is not carried over to profile.html (bottom function)
-
-async function updatePreference(chosen) {
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
-        for await (const doc of cursor1) {
-            // check if password is correct or if account exists
-            var preferencesList = doc.preferences.split(",")
-            console.log(preferencesList);
-            var ul = document.getElementById("preferenceList");
-            for (var i=0; i<preferencesList.length;i++) {
-                var li = document.createElement('li');
-                li.innerHTML = excerciseList[preferencesList[i]];
-                ul.appendChild(li);
-            }
-
-          }
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-}
+  const preferenceChart = new Chart(document.getElementById('preferenceChart'), {
+    type: 'polarArea',
+    data: preferenceData,
+  });
 }
 
 function runScheduling() {
   console.log("UserId:", window.userId);
-  const calendar = document.querySelector('.calendar');
+  const userId = window.userId;
 
-        // Days of the week for data-day attribute
-        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-        // Initialize the nested array to track active cells
-        const activeCells = Array.from({ length: 7 }, () => []);
-
-        let isMouseDown = false;
-
-        // Function to handle toggling cell active state
-        function toggleCellActive(cell) {
-            // Get day and hour
-            const day = cell.getAttribute('data-day');
-            const hour = cell.getAttribute('data-hour');
-            const dayIndex = daysOfWeek.indexOf(day);
-
-            // Toggle the 'active' class to light up the cell
-            cell.classList.toggle('active');
-
-            // Update the nested array based on the active state
-            if (cell.classList.contains('active')) {
-                activeCells[dayIndex].push(hour);
-            } else {
-                activeCells[dayIndex] = activeCells[dayIndex].filter(h => h !== hour);
-            }
-
-            // Sort times from earliest to latest
-            activeCells[dayIndex].sort((a, b) => {
-                const [startA] = a.split(':');
-                const [startB] = b.split(':');
-                return Number(startA[0]) - Number(startB[0]);
-            });
-        }
-
-        // Loop through 24 hours and 7 days to create cells
-        for (let hour = 0; hour < 24; hour++) {
-            for (let day = 0; day < 7; day++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell', 'clickable');
-                cell.setAttribute('data-day', daysOfWeek[day]);
-                cell.setAttribute('data-hour', `${hour}:00-${hour + 1}:00`);
-                cell.textContent = `${hour}:00-${hour + 1}:00`;
-                calendar.appendChild(cell);
-
-                // Add event listener to handle click event
-                cell.addEventListener('mousedown', function() {
-                    isMouseDown = true;
-                    toggleCellActive(this);
-                });
-
-                cell.addEventListener('mouseover', function() {
-                    if (isMouseDown) {
-                        toggleCellActive(this);
-                    }
-                });
-            }
-        }
-
-        // Add event listeners to handle mouse up event
-        document.addEventListener('mouseup', function() {
-            isMouseDown = false;
-        });
-
-        // Function to get the nested array of active cells
-        function getActiveCells() {
-            return activeCells;
-        }
-
-        // Add event listener to the button to log the active cells
-        document.getElementById('get-active-cells').addEventListener('click', function() {
-            console.log(getActiveCells());
-        });
-}
-
-
-function forgotPassword() {
-  // implement forgotPassword
-}
-
-function switchToSignup() {
-    window.location.href="signup.html";
-}
-
-function switchToSignin() {
-  window.location.href="index.html";
+  // FullCalendar initialization code here
 }
