@@ -5,6 +5,10 @@ const session = require('express-session');
 const path = require('path');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
+var store = new MongoDBStore({
+    uri: 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/', 
+    collection: 'sessions'
+})
 const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/';
 const client = new MongoClient(uri);
 
@@ -23,13 +27,15 @@ store.on('error', function (error) {
   console.error('Session store error:', error);
 });
 
-app.use(session({
-  secret: secretKey,
-  resave: false,
-  saveUninitialized: true,
-  store: store,
-  cookie: { secure: false }
-}));
+app.use(require('express-session')({
+    secret: 'This is a secret',
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 // 1 week
+    },
+    store: store,
+    resave: true,
+    saveUninitialized: true
+  }));
 
 app.use(express.static(path.join(__dirname))); // Serve static files from the root directory
 app.use(bodyParser.json());
