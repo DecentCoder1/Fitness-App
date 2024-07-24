@@ -2,9 +2,21 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const session = require('express-session');
-const RedisStore = require('connect-redis').default;
-const redis = require('redis');
+const redis = require('ioredis');
 const path = require('path');
+
+var redisClient = redis.createClient({host:'localhost',port:6379,username:'bruh',password:'moment'});
+
+redisClient.on('connect',() => {
+    console.log('connected to redis successfully!');
+})
+
+redisClient.on('error',(error) => {
+    console.log('Redis connection error :', error);
+})
+
+module.exports = redisClient;
+
 
 // MongoDB client setup
 const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fitness-app-data?retryWrites=true&w=majority';
