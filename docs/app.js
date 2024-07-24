@@ -22,11 +22,6 @@ module.exports = redisClient;
 const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fitness-app-data?retryWrites=true&w=majority';
 const client = new MongoClient(uri);
 
-// Redis client setup
-const redisClient = redis.createClient({
-    url: "redis://redis:6379",
-});
-
 const app = express();
 const port = 3000;
 
