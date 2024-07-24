@@ -18,7 +18,7 @@ const port = 3000;
 // Use a manually defined secret key
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy'; // Replace with a strong, random string
 
-const store = new MongoDBStore({
+var store = new MongoDBStore({
   uri: uri,
   collection: 'sessions'
 });
