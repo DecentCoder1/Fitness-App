@@ -24,11 +24,9 @@ app.set('views', path.join(__dirname)); // Use the root directory for views
 
 // Middleware to handle database connection
 app.use(async (req, res, next) => {
-  if (!client.isConnected()) {
     await client.connect();
-  }
-  req.db = client.db("fitness-app-data");
-  next();
+    req.db = client.db("fitness-app-data");
+    next();
 });
 
 const authenticateToken = (req, res, next) => {
@@ -53,11 +51,13 @@ app.post('/home', async (req, res) => {
     const cursor = req.db.collection("logins");
     const user = await cursor.findOne({ email: email });
 
-    if (user && bcrypt.compareSync(password, user.password)) {
-      const token = jwt.sign({ userId: user._id.toString(), email: user.email }, secretKey, { expiresIn: '1h' });
+    if (user && password === user.password) {
+      const token = jwt.sign({ userId: user._id.toString(), email: user.email }, secretKey, { expiresIn: '12h' });
       res.json({ token });
     } else {
       res.send("Invalid email or password");
+      console.log(password)
+        console.log(user.password)
     }
   } catch (error) {
     console.error('Error during login:', error);
