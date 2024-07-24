@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+const RedisStore = require('connect-redis').default;
 const redis = require('redis');
 const path = require('path');
 
@@ -12,8 +12,7 @@ const client = new MongoClient(uri);
 
 // Redis client setup
 const redisClient = redis.createClient({
-  host: 'localhost', // replace with your Redis server host
-  port: 6379 // replace with your Redis server port
+    url: "redis://redis:6379",
 });
 
 const app = express();
@@ -22,13 +21,21 @@ const port = 3000;
 // Use a manually defined secret key
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy'; // Replace with a strong, random string
 
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: secretKey,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
-}));
+let redisStore = new RedisStore({
+    client: redisClient,
+});
+
+app.use(
+   session({
+     store: redisStore,
+     secret: secretKey,
+     resave: false,
+     saveUninitialized: false,
+     cookie: {
+       secure: false,
+    },
+  })
+);
 
 app.use(express.static(path.join(__dirname))); // Serve static files from the root directory
 app.use(bodyParser.json());
