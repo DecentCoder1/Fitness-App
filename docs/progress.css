@@ -92,7 +92,7 @@ ul {
     padding: 0;
 }
 
-/*li {
+li {
     display: table;
     margin-top: 1px;
     align-items: center;
@@ -103,14 +103,12 @@ ul {
     background-color: #25b396;
     font-size: 8px;
 }
-*/
 
 .delete button {
     width: 10px;
     height: 9px;
     border: 1px solid black;
-    color: #ffffff;
-    overflow: hidden;
+    color: #ff0000;
 }
 
 .complete:disabled {

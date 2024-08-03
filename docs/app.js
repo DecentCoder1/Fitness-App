@@ -9,7 +9,7 @@ const uri = 'mongodb+srv://main:xCEwUyNzOzCdzSfa@cluster0.ofinyq6.mongodb.net/fi
 const client = new MongoClient(uri);
 
 const app = express();
-const port = 3000;
+const port = 8080;
 
 // Secret key for JWT
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy'; // Replace with a strong, random string
@@ -30,7 +30,9 @@ app.use(async (req, res, next) => {
 });
 
 const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization'];
+  const authHeader = req.headers['authorization'];
+  var token = localStorage.getItem('token');
+
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, secretKey, (err, user) => {
@@ -40,6 +42,14 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Route to get user ID
+app.get('/getUserId', authenticateToken, (req, res) => {
+  console.log('Authenticated user:', req.user); // Debugging log
+  const userId = req.user.userId;
+  res.json({ userId });
+});
+
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -47,17 +57,34 @@ app.get('/', (req, res) => {
 app.post('/home', async (req, res) => {
   const { email, password } = req.body;
 
+  console.log('Received login request:', { email, password });
+
   try {
     const cursor = req.db.collection("logins");
     const user = await cursor.findOne({ email: email });
 
-    if (user && password === user.password) {
-      const token = jwt.sign({ userId: user._id.toString(), email: user.email }, secretKey, { expiresIn: '12h' });
-      res.json({ token });
+    console.log('Database query result:', user);
+
+    if (user) {
+      console.log('Comparing passwords:', { provided: password, stored: user.password });
+
+      if (password === user.password) {
+        const token = jwt.sign({ userId: user._id.toString(), email: user.email }, secretKey, { expiresIn: '12h' });
+        res.send(`
+          <script>
+            const token = "${token}";
+            console.log('Generated token:', token);
+            localStorage.setItem('token', token); // Store token in localStorage for later use
+            window.location.href = '/profile';
+          </script>
+        `);
+      } else {
+        res.send("Invalid email or password");
+        console.log('Password mismatch:', { provided: password, stored: user.password });
+      }
     } else {
       res.send("Invalid email or password");
-      console.log(password)
-        console.log(user.password)
+      console.log('User not found:', { email });
     }
   } catch (error) {
     console.error('Error during login:', error);
@@ -65,8 +92,20 @@ app.post('/home', async (req, res) => {
   }
 });
 
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(__dirname, 'profile.html'));
+});
+
 app.get('/progress', authenticateToken, (req, res) => {
-  res.sendFile(path.join(__dirname, 'progress.html'));
+  res.render('progress')
+});
+
+app.get('/composition', (req, res) => {
+  res.sendFile(path.join(__dirname, 'composition.html'));
+});
+
+app.get('/scheduling', (req, res) => {
+  res.sendFile(path.join(__dirname, 'scheduling.html'));
 });
 
 app.get('/submitSignup', (req, res) => {

@@ -1,30 +1,34 @@
+// remember to use mystical power to buff uxie (sp. atk)
 document.addEventListener("DOMContentLoaded", function() {
   const currentPath = window.location.pathname;
 
-  if (currentPath.endsWith("index.html")) {
+  if (currentPath.endsWith("/")) {
     runIndex();
   } else if (currentPath.endsWith("signup.html")) {
     runSignup();
-  } else if (currentPath.endsWith("progress.html")) {
+  } else if (currentPath.endsWith("/progress")) {
     runProgress();
-  } else if (currentPath.endsWith("profile.html")) {
+  } else if (currentPath.endsWith("/profile")) {
     runProfile();
-  } else if (currentPath.endsWith("composition.html")) {
+  } else if (currentPath.endsWith("/composition")) {
     runComposition();
   } else if (currentPath.endsWith("preference.html")) {
     runPreference();
-  } else if (currentPath.endsWith("scheduling.html")) {
+  } else if (currentPath.endsWith("/scheduling")) {
     runScheduling();
   }
 });
 
-function fetchUserId(callback) {
-  const token = localStorage.getItem('token');
-  fetch('/getUserId', {
-    headers: {
-      'Authorization': token
-    }
-  })
+const secretKey = 'dakjlnqewuoizxvmkajlqiuoy';
+  
+  function fetchUserId(callback) {
+    const token = localStorage.getItem('token');
+  
+    fetch('/getUserId', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
     .then(response => {
       if (response.ok) {
         return response.json();
@@ -40,7 +44,19 @@ function fetchUserId(callback) {
       console.error('Error:', error);
       window.location.href = '/';
     });
-}
+  }
+
+  function onUserIdFetched() {
+    console.log('User ID fetched successfully:', window.userId);
+  
+    // You can now perform any actions that require the user ID
+    // For example, fetching user-specific data, updating the UI, etc.
+  }
+  
+  // Call the fetchUserId function and pass the callback
+  function getId() {
+    fetchUserId(onUserIdFetched);
+  }
 
 function runIndex() {
   document.getElementById('loginForm').addEventListener('submit', function(event) {
@@ -91,6 +107,7 @@ function runSignup() {
 function runProgress() {
   const token = localStorage.getItem('token');
   console.log("UserId:", window.userId);
+  
   // progress bar stuff done with https://codeconvey.com/semi-circle-progress-bar-css/
 
   // Access the userId passed from the server
@@ -121,148 +138,332 @@ function runProgress() {
         }
         });
     }); 
-}
+  }
 
-$(document).ready(animatePercentage(101));
+  $(document).ready(animatePercentage(101));
 
-const taskInput = document.getElementById("task");
-const addBtn = document.getElementById("add");
-const taskList = document.getElementById("taskList");
-let done = 0;
+  const taskInput = document.getElementById("task");
+  const addBtn = document.getElementById("add");
+  const taskList = document.getElementById("taskList");
+  let done = 0;
+  let total = 0;
 
-// Add task
-addBtn.addEventListener("click", () => {
-    const taskText = taskInput.value.trim();
-    if (taskText !== "") {
-        createTask(taskText);
-        taskInput.value = "";
-    }
-});
+  // Add task
+  addBtn.addEventListener("click", () => {
+      const taskText = taskInput.value.trim();
+      if (taskText !== "") {
+          createTask(taskText);
+          taskInput.value = "";
+      }
+  });
 
-// Create a new task
-function createTask(text) {
-    const taskItem = document.createElement("li");
-    taskItem.innerHTML = `
-        <div style="margin-top: 1px; margin-bottom: 1px; background-color: #FFD300; display: table; align-items: center; border-radius: 4px; min-width: 100px;width: fit-content; height: 20px; border: 1px solid black; ">
-        <button class="complete" style="border-radius: 2px; border: 1px solid gray; background-color: white; font-family: 'Impact', 'fantasy', 'Arial Black'; font-weight: 1000; font-size: 10px; color: #25b396; height: 20px; width: 20px; padding: 0px; margin: 1px;"></button>
-        <span style="position: relative; font-size: 16px; ">${text}</span>
-        </div>
-    `;
-    taskList.appendChild(taskItem);
+  // Create a new task
+  function createTask(text) {
+      const taskItem = document.createElement("li");
+      taskItem.innerHTML = `
+          <div style="margin-top: 1px; margin-bottom: 1px; background-color: #FFD300; display: table; align-items: center; border-radius: 4px; min-width: 100px;width: fit-content; height: 20px; border: 1px solid black; ">
+          <button class="complete" style="border-radius: 2px; border: 1px solid gray; background-color: white; font-family: 'Impact', 'fantasy', 'Arial Black'; font-weight: 1000; font-size: 10px; color: #25b396; height: 20px; width: 20px; padding: 0px; margin: 1px;"></button>
+          <span style="position: relative; font-size: 16px; ">${text}</span>
+          </div>
+      `;
+      taskList.appendChild(taskItem);
 
-    // Delete task
-    const deleteBtn = taskItem.querySelector(".complete");
-    deleteBtn.addEventListener("click", () => {
-        deleteBtn.innerHTML="&#10003;"
-        taskItem.remove();
-        done -= 1;
-        animatePercentage(100*done/total);
-    });
+      // Delete task
+      const deleteBtn = taskItem.querySelector(".complete");
+      console.log();
+      deleteBtn.addEventListener("click", () => {
+          deleteBtn.innerHTML="&#10003;"
+          taskItem.classList.add("delete");
+          done -= 1;
+          animatePercentage(100*(total-done)/total);
+      });
 
-    total += 1;
-    done += 1;
-    animatePercentage(100*done/total);
-}
+      total += 1;
+      done += 1;
+      animatePercentage(100*(total-done)/total);
+  }
 }
 
 function runProfile() {
-  console.log("UserId:", window.userId);
-  const userId = window.userId;
+  const token = localStorage.getItem('token');
+  console.log(token);function fetchUserId(callback) {
+  const token = localStorage.getItem('token');
 
-  const genderChart = new Chart(document.getElementById('genderChart'), {
-    type: 'pie',
-    data: {
-      labels: ['Male', 'Female', 'Other'],
-      datasets: [{
-        label: 'Gender',
-        data: [50, 50, 0],
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-      }],
-    },
+  fetch('/getUserId', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error('Not logged in');
+    }
+  })
+  .then(data => {
+    window.userId = data.userId; // Store userId globally
+    callback();
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    window.location.href = '/';
+  });
+}
+  let chosen = new Array(0);
+  document.getElementById('composition').addEventListener("click", () => {
+    window.location.href = '/composition'
+  });
+  document.getElementById('scheduling').addEventListener("click", () => {
+    window.location.href = '/scheduling'
   });
 
-  const ageChart = new Chart(document.getElementById('ageChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Under 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
-      datasets: [{
-        label: 'Age',
-        data: [5, 10, 15, 20, 10, 5, 2],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      }],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  });
+const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
 
-  const weightChart = new Chart(document.getElementById('weightChart'), {
-    type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-      datasets: [{
-        label: 'Weight',
-        data: [200, 195, 190, 185, 180, 175, 170],
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1,
-      }],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: false,
-        },
-      },
-    },
-  });
+document.getElementById('submitButton').addEventListener("click", function() {
+    onSubmit();
+ });
+
+async function onSubmit() {
+    let checkboxes = document.getElementsByName('preference');
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            chosen.push(i);
+        }
+    }
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var userEmail = sessionStorage.getItem('email');
+        await cursor.update(
+            { email: userEmail },
+            {
+              $set: {
+                preferences: chosen.toString()
+              }
+            }
+         )
+        console.log("successful");
+        res.send("successful");
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+    document.location.href = "profile.html";
+    do {
+       updatePreference(chosen);
+    } while(document.location.href !== "profile.html");
+}
+
+// things added to chosen is not carried over to profile.html (bottom function)
+
+async function updatePreference(chosen) {
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
+        for await (const doc of cursor1) {
+            // check if password is correct or if account exists
+            var preferencesList = doc.preferences.split(",")
+            console.log(preferencesList);
+            var ul = document.getElementById("preferenceList");
+            for (var i=0; i<preferencesList.length;i++) {
+                var li = document.createElement('li');
+                li.innerHTML = excerciseList[preferencesList[i]];
+                ul.appendChild(li);
+            }
+
+          }
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+}
 }
 
 function runComposition() {
-  console.log("UserId:", window.userId);
-  const userId = window.userId;
+  const token = localStorage.getItem('token');
+  console.log(token);
+  // Get reference to the wrapper div
+var wrapperDiv = document.getElementById('q1'); // all the way to q10
 
-  const compositionData = {
-    labels: ['Fat', 'Muscle', 'Bone', 'Water'],
-    datasets: [{
-      label: 'Body Composition',
-      data: [20, 50, 10, 20],
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-    }],
-  };
+// Get all radio buttons inside the wrapper div
+var radioButtons = wrapperDiv.querySelectorAll('input[type="radio"][name="yes_no"]');
 
-  const compositionChart = new Chart(document.getElementById('compositionChart'), {
-    type: 'doughnut',
-    data: compositionData,
-  });
+// Variable to store the selected value
+var selectedValue;
+
+// Loop through radio buttons to find the checked one
+radioButtons.forEach(function(radioButton) {
+  if (radioButton.checked) {
+    selectedValue = radioButton.value;
+  }
+});
+
+// Now selectedValue contains the value of the selected radio button
+console.log(selectedValue);
+
 }
 
 function runPreference() {
-  console.log("UserId:", window.userId);
-  const userId = window.userId;
+  const token = localStorage.getItem('token');
+  console.log(token);
+  let chosen = new Array(0);
 
-  const preferenceData = {
-    labels: ['Cardio', 'Strength', 'Flexibility', 'Balance'],
-    datasets: [{
-      label: 'Exercise Preferences',
-      data: [25, 50, 15, 10],
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-    }],
-  };
+const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
 
-  const preferenceChart = new Chart(document.getElementById('preferenceChart'), {
-    type: 'polarArea',
-    data: preferenceData,
-  });
+document.getElementById('submitButton').addEventListener("click", function() {
+    onSubmit();
+ });
+
+async function onSubmit() {
+    let checkboxes = document.getElementsByName('preference');
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            chosen.push(i);
+        }
+    }
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var userEmail = sessionStorage.getItem('email');
+        await cursor.update(
+            { email: userEmail },
+            {
+              $set: {
+                preferences: chosen.toString()
+              }
+            }
+         )
+        console.log("successful");
+        res.send("successful");
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+    document.location.href = "profile.html";
+    do {
+       updatePreference(chosen);
+    } while(document.location.href !== "profile.html");
+}
+
+// things added to chosen is not carried over to profile.html (bottom function)
+
+async function updatePreference(chosen) {
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
+        const cursor = client.db("fitness-app-data").collection("logins");
+        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
+        for await (const doc of cursor1) {
+            // check if password is correct or if account exists
+            var preferencesList = doc.preferences.split(",")
+            console.log(preferencesList);
+            var ul = document.getElementById("preferenceList");
+            for (var i=0; i<preferencesList.length;i++) {
+                var li = document.createElement('li');
+                li.innerHTML = excerciseList[preferencesList[i]];
+                ul.appendChild(li);
+            }
+
+          }
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+    } finally {
+    // Close the connection when done
+    await client.close();
+    console.log("Connection closed");
+    }
+}
 }
 
 function runScheduling() {
-  console.log("UserId:", window.userId);
-  const userId = window.userId;
+  const token = localStorage.getItem('token');
+  console.log(token);
 
-  // FullCalendar initialization code here
+  const calendar = document.querySelector('.calendar');
+
+        // Days of the week for data-day attribute
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        // Initialize the nested array to track active cells
+        const activeCells = Array.from({ length: 7 }, () => []);
+
+        let isMouseDown = false;
+
+        // Function to handle toggling cell active state
+        function toggleCellActive(cell) {
+            // Get day and hour
+            const day = cell.getAttribute('data-day');
+            const hour = cell.getAttribute('data-hour');
+            const dayIndex = daysOfWeek.indexOf(day);
+
+            // Toggle the 'active' class to light up the cell
+            cell.classList.toggle('active');
+
+            // Update the nested array based on the active state
+            if (cell.classList.contains('active')) {
+                activeCells[dayIndex].push(hour);
+            } else {
+                activeCells[dayIndex] = activeCells[dayIndex].filter(h => h !== hour);
+            }
+
+            // Sort times from earliest to latest
+            activeCells[dayIndex].sort((a, b) => {
+                const [startA] = a.split(':');
+                const [startB] = b.split(':');
+                return Number(startA[0]) - Number(startB[0]);
+            });
+        }
+
+        // Loop through 24 hours and 7 days to create cells
+        for (let hour = 0; hour < 24; hour++) {
+            for (let day = 0; day < 7; day++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell', 'clickable');
+                cell.setAttribute('data-day', daysOfWeek[day]);
+                cell.setAttribute('data-hour', `${hour}:00-${hour + 1}:00`);
+                cell.textContent = `${hour}:00-${hour + 1}:00`;
+                calendar.appendChild(cell);
+
+                // Add event listener to handle click event
+                cell.addEventListener('mousedown', function() {
+                    isMouseDown = true;
+                    toggleCellActive(this);
+                });
+
+                cell.addEventListener('mouseover', function() {
+                    if (isMouseDown) {
+                        toggleCellActive(this);
+                    }
+                });
+            }
+        }
+
+        // Add event listeners to handle mouse up event
+        document.addEventListener('mouseup', function() {
+            isMouseDown = false;
+        });
+
+        // Function to get the nested array of active cells
+        function getActiveCells() {
+            return activeCells;
+        }
+
+        // Add event listener to the button to log the active cells
+        document.getElementById('get-active-cells').addEventListener('click', function() {
+            console.log(getActiveCells());
+        });
 }
