@@ -1,6 +1,6 @@
-// remember to use mystical power to buff uxie (sp. atk)
 document.addEventListener("DOMContentLoaded", function() {
   const currentPath = window.location.pathname;
+  console.log(currentPath);
 
   if (currentPath.endsWith("/")) {
     runIndex();
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 const secretKey = 'dakjlnqewuoizxvmkajlqiuoy';
-  
+
   function fetchUserId(callback) {
     const token = localStorage.getItem('token');
   
@@ -42,7 +42,7 @@ const secretKey = 'dakjlnqewuoizxvmkajlqiuoy';
     })
     .catch(error => {
       console.error('Error:', error);
-      window.location.href = '/';
+      window.location.href = '/'; 
     });
   }
 
@@ -101,18 +101,11 @@ function runSignup() {
       window.location.href = '/';
     })
     .catch(error => console.error('Error:', error));
-  });
+});
 }
 
 function runProgress() {
-  const token = localStorage.getItem('token');
-  console.log("UserId:", window.userId);
-  
-  // progress bar stuff done with https://codeconvey.com/semi-circle-progress-bar-css/
-
-  // Access the userId passed from the server
-  const userId = "<%= userId %>";
-  console.log("User ID:", userId);
+  console.log(getId());
 
   function animatePercentage(perc) {
     if (perc == 101) {
@@ -137,7 +130,7 @@ function runProgress() {
             }
         }
         });
-    }); 
+    });
   }
 
   $(document).ready(animatePercentage(101));
@@ -185,113 +178,17 @@ function runProgress() {
 }
 
 function runProfile() {
-  const token = localStorage.getItem('token');
-  console.log(token);function fetchUserId(callback) {
-  const token = localStorage.getItem('token');
-
-  fetch('/getUserId', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Not logged in');
-    }
-  })
-  .then(data => {
-    window.userId = data.userId; // Store userId globally
-    callback();
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    window.location.href = '/';
-  });
-}
+  console.log(getId());
   let chosen = new Array(0);
-  document.getElementById('composition').addEventListener("click", () => {
-    window.location.href = '/composition'
-  });
+  console.log('here');
+
   document.getElementById('scheduling').addEventListener("click", () => {
-    window.location.href = '/scheduling'
+    window.location.href = '/scheduling';
   });
-
-const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
-
-document.getElementById('submitButton').addEventListener("click", function() {
-    onSubmit();
- });
-
-async function onSubmit() {
-    let checkboxes = document.getElementsByName('preference');
-    for (var i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked) {
-            chosen.push(i);
-        }
-    }
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var userEmail = sessionStorage.getItem('email');
-        await cursor.update(
-            { email: userEmail },
-            {
-              $set: {
-                preferences: chosen.toString()
-              }
-            }
-         )
-        console.log("successful");
-        res.send("successful");
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-    document.location.href = "profile.html";
-    do {
-       updatePreference(chosen);
-    } while(document.location.href !== "profile.html");
-}
-
-// things added to chosen is not carried over to profile.html (bottom function)
-
-async function updatePreference(chosen) {
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
-        for await (const doc of cursor1) {
-            // check if password is correct or if account exists
-            var preferencesList = doc.preferences.split(",")
-            console.log(preferencesList);
-            var ul = document.getElementById("preferenceList");
-            for (var i=0; i<preferencesList.length;i++) {
-                var li = document.createElement('li');
-                li.innerHTML = excerciseList[preferencesList[i]];
-                ul.appendChild(li);
-            }
-
-          }
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-}
 }
 
 function runComposition() {
-  const token = localStorage.getItem('token');
-  console.log(token);
+  console.log(getId());
   // Get reference to the wrapper div
 var wrapperDiv = document.getElementById('q1'); // all the way to q10
 
@@ -314,8 +211,7 @@ console.log(selectedValue);
 }
 
 function runPreference() {
-  const token = localStorage.getItem('token');
-  console.log(token);
+  console.log(getId());
   let chosen = new Array(0);
 
 const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge", "Plank to Downward Dog", "Straight-leg donkey kick", "Bird Dog", "Forearm plank", "Side-lying hip abduction", "Bicycle crunch", "Single-leg bridge", "Squat", "Pushup", "Walking lunge", "Pike pushups", "Get-up squat", "Superman", "Plank with alternating leg lift", "situp", "Dead bug", "Bridge with leg extended", "Overhead squat", "One-legged pushup", "Jumping lunges", "Elevated pike pushups", "Get-up squat with jump", "Advanced Bird Dog", "One-leg or one-arm plank", "Side plank with hip abduction", "Hollow hold to jackknife"];
@@ -323,6 +219,7 @@ const excerciseList = ["Bridge", "Chair squat", "Knee pushup", "Stationary lunge
 document.getElementById('submitButton').addEventListener("click", function() {
     onSubmit();
  });
+}
 
 async function onSubmit() {
     let checkboxes = document.getElementsByName('preference');
@@ -331,32 +228,14 @@ async function onSubmit() {
             chosen.push(i);
         }
     }
-    try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        const cursor = client.db("fitness-app-data").collection("logins");
-        var userEmail = sessionStorage.getItem('email');
-        await cursor.update(
-            { email: userEmail },
-            {
-              $set: {
-                preferences: chosen.toString()
-              }
-            }
-         )
-        console.log("successful");
-        res.send("successful");
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-    } finally {
-    // Close the connection when done
-    await client.close();
-    console.log("Connection closed");
-    }
-    document.location.href = "profile.html";
-    do {
-       updatePreference(chosen);
-    } while(document.location.href !== "profile.html");
+    fetch('/save-exercises', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: getId(), excerciseList: chosen.toString() })
+  })
+  .then(response => response.json())
+  .then(data => console.log('Success for list1:', data))
+  .catch(error => console.error('Error for list1:', error));
 }
 
 // things added to chosen is not carried over to profile.html (bottom function)
@@ -366,7 +245,9 @@ async function updatePreference(chosen) {
         await client.connect();
         console.log("Connected to MongoDB");
         const cursor = client.db("fitness-app-data").collection("logins");
-        var cursor1 = cursor.find({email: sessionStorage.getItem("email")});
+        const oid = getId();
+        const objectId = new ObjectId(oid);
+        var cursor1 = cursor.find({ _id: objectId });
         for await (const doc of cursor1) {
             // check if password is correct or if account exists
             var preferencesList = doc.preferences.split(",")
@@ -377,8 +258,7 @@ async function updatePreference(chosen) {
                 li.innerHTML = excerciseList[preferencesList[i]];
                 ul.appendChild(li);
             }
-
-          }
+        }
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
     } finally {
@@ -387,11 +267,9 @@ async function updatePreference(chosen) {
     console.log("Connection closed");
     }
 }
-}
 
 function runScheduling() {
-  const token = localStorage.getItem('token');
-  console.log(token);
+  console.log(getId());
 
   const calendar = document.querySelector('.calendar');
 
@@ -456,14 +334,35 @@ function runScheduling() {
         document.addEventListener('mouseup', function() {
             isMouseDown = false;
         });
-
+        console.log(getId());
         // Function to get the nested array of active cells
-        function getActiveCells() {
-            return activeCells;
+        async function getActiveCells() {
+          fetch('/save-scheduling', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: window.userId, schedulingList: activeCells})
+        })
+        .then(response => response.json())
+        .then(data => console.log('Success for list1:', data))
+        .catch(error => console.error('Error for list1:', error));
+          return activeCells;
         }
+
+        // for reading from string in database
+        // const parsedList = JSON.parse(schedulingList);
 
         // Add event listener to the button to log the active cells
         document.getElementById('get-active-cells').addEventListener('click', function() {
             console.log(getActiveCells());
+            fetch('/save-scheduling', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ // edit this for fetching comparison of two lists
+                })
+              })
+              .then(response => response.json())
+              .then(data => console.log('Success for list1:', data))
+              .catch(error => console.error('Error for list1:', error));
         });
+        
 }

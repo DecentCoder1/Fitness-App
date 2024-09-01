@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const path = require('path');
@@ -31,22 +31,32 @@ app.use(async (req, res, next) => {
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  var token = localStorage.getItem('token');
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer token
 
-  if (!token) return res.sendStatus(401);
+  if (!token) return res.sendStatus(401); // Unauthorized if token is missing
 
   jwt.verify(token, secretKey, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.sendStatus(403); // Forbidden if token is invalid
     req.user = user;
     next();
   });
 };
 
+
 // Route to get user ID
-app.get('/getUserId', authenticateToken, (req, res) => {
-  console.log('Authenticated user:', req.user); // Debugging log
-  const userId = req.user.userId;
-  res.json({ userId });
+app.get('/getUserId', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Authorization header is missing' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    res.json({ userId: decoded.userId });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
 });
 
 
@@ -96,7 +106,7 @@ app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'profile.html'));
 });
 
-app.get('/progress', authenticateToken, (req, res) => {
+app.get('/progress', (req, res) => {
   res.render('progress')
 });
 
@@ -105,6 +115,7 @@ app.get('/composition', (req, res) => {
 });
 
 app.get('/scheduling', (req, res) => {
+  console.log(path.join(__dirname));
   res.sendFile(path.join(__dirname, 'scheduling.html'));
 });
 
@@ -126,6 +137,114 @@ app.post('/submitSignup', async (req, res) => {
   }
 });
 
+app.post("/save-exercises", async (req, res) => {
+  const { userId, excerciseList } = req.body;
+  
+    try {
+      await client.connect();
+      console.log('Connected to MongoDB');
+  
+      const database = client.db('fitness-app-data'); // Replace with your database name
+      const collection = database.collection('logins'); // Replace with your collection name
+  
+      // Example ObjectId string
+      const objectId = new ObjectId(userId);
+
+      // Find the document by ObjectId
+      const user = await collection.findOne({ _id: objectId });
+      console.log('User:', user);
+  
+      // Update the document by ObjectId
+      const updateResult = await collection.updateOne(
+        { _id: objectId },
+        { $set: { exercises: excerciseList } } // Replace with the new exercises data
+      );
+      console.log('Update Result:', updateResult);
+  
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      await client.close();
+      console.log('Connection closed');
+    }
+});
+
+app.post("/save-scheduling", async (req, res) => {
+  const { userId, schedulingList } = req.body;
+
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+
+    const database = client.db('fitness-app-data'); // Replace with your database name
+    const collection = database.collection('logins'); // Replace with your collection name
+
+    // Example ObjectId string
+    console.log(userId);
+
+    // Update the document by ObjectId
+    const updateResult = await collection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { timeslots: schedulingList } } // Replace with the new exercises data
+    );
+    console.log('Update Result:', updateResult);
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    await client.close();
+    console.log('Connection closed');
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+async function findOverlappingTimes(userId1, userId2) {
+  try {
+    await client.connect();
+    const database = client.db('fitness-app-data');
+    const collection = database.collection('logins');
+
+    // Fetch scheduling lists for both users
+    const user1 = await collection.findOne({ _id: new ObjectId(userId1) });
+    const user2 = await collection.findOne({ _id: new ObjectId(userId2) });
+
+    const schedulingList1 = user1.schedulingList;
+    const schedulingList2 = user2.schedulingList;
+
+    const overlaps = [];
+
+    // Compare the lists day by day
+    for (let i = 0; i < schedulingList1.length; i++) {
+      const dayOverlap = schedulingList1[i].filter(timeSlot => schedulingList2[i].includes(timeSlot));
+      overlaps.push(dayOverlap);
+    }
+
+    return overlaps;
+
+  } catch (error) {
+    console.error('Error finding overlaps:', error);
+  } finally {
+    await client.close();
+  }
+}
+
+app.post('/find-overlap', async (req, res) => {
+  const { userId1, userId2 } = req.body;
+
+  try {
+    const overlaps = await findOverlappingTimes(userId1, userId2);
+    res.json({ overlaps });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// can let user choose trainer and schedule a time, and also the other way around
+// create flow for pages
+// make scheduling.html into a new page where its standalone
+// user can choose time and it will show the list of coaches on the side
+// 15% top 85% bottom, top for search and bottom right shows list of coaches refer to crimson notes: https://app.crimsoneducation.org/session/1646759/agenda
+// list all coaches on the side (make unavailable coaches unschedulable - alternate solution to ^)
+// card style with coach name, description, schedule, and scrollable
