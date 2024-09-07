@@ -347,6 +347,16 @@ function runScheduling() {
         .catch(error => console.error('Error for list1:', error));
           return activeCells;
         }
+        async function findOverlap() {
+          fetch('/find-overlap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId1: window.userId, userId2: "6615485e1ea08306c60ea415"})
+            })
+            .then(response => response.json())
+            .then(data => console.log('Success for comparing', data))
+            .catch(error => console.error('Error for list1:', error));
+        }
 
         // for reading from string in database
         // const parsedList = JSON.parse(schedulingList);
@@ -354,15 +364,9 @@ function runScheduling() {
         // Add event listener to the button to log the active cells
         document.getElementById('get-active-cells').addEventListener('click', function() {
             console.log(getActiveCells());
-            fetch('/save-scheduling', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ // edit this for fetching comparison of two lists
-                })
-              })
-              .then(response => response.json())
-              .then(data => console.log('Success for list1:', data))
-              .catch(error => console.error('Error for list1:', error));
         });
-        
+
+        document.getElementById('compare').addEventListener('click', function() {
+          findOverlap();
+        })
 }

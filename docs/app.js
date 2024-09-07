@@ -193,6 +193,7 @@ app.post("/save-scheduling", async (req, res) => {
   } finally {
     await client.close();
     console.log('Connection closed');
+    // adding client.close() here would make it not be able to compare
   }
 });
 
@@ -200,7 +201,9 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
 
-async function findOverlappingTimes(userId1, userId2) {
+app.post('/find-overlap', async (req, res) => {
+  const { userId1, userId2 } = req.body;
+
   try {
     await client.connect();
     const database = client.db('fitness-app-data');
@@ -210,8 +213,8 @@ async function findOverlappingTimes(userId1, userId2) {
     const user1 = await collection.findOne({ _id: new ObjectId(userId1) });
     const user2 = await collection.findOne({ _id: new ObjectId(userId2) });
 
-    const schedulingList1 = user1.schedulingList;
-    const schedulingList2 = user2.schedulingList;
+    const schedulingList1 = user1.timeslots;
+    const schedulingList2 = user2.timeslots;
 
     const overlaps = [];
 
@@ -221,25 +224,16 @@ async function findOverlappingTimes(userId1, userId2) {
       overlaps.push(dayOverlap);
     }
 
-    return overlaps;
+    res.json({ overlaps });
 
   } catch (error) {
     console.error('Error finding overlaps:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   } finally {
     await client.close();
   }
-}
-
-app.post('/find-overlap', async (req, res) => {
-  const { userId1, userId2 } = req.body;
-
-  try {
-    const overlaps = await findOverlappingTimes(userId1, userId2);
-    res.json({ overlaps });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
 });
+
 
 // can let user choose trainer and schedule a time, and also the other way around
 // create flow for pages
