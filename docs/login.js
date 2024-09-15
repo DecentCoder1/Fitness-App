@@ -329,6 +329,50 @@ function runScheduling() {
                 });
             }
         }
+        
+        const cardContainer = document.getElementById('card-container');
+        cardContainer.style.maxHeight = "600px";
+        cardContainer.style.overflowY = "auto";
+
+        function createCard(title, content) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            const button = document.createElement('button');
+            button.classList.add('cardButton')
+            button.textContent = "submit";
+
+            const cardTitle = document.createElement('h2');
+            cardTitle.textContent = title;
+
+            const cardContent = document.createElement('p');
+            cardContent.textContent = content;
+
+            card.appendChild(cardTitle);
+            card.appendChild(button)
+            card.appendChild(cardContent);
+
+            return card;
+        }
+
+        // Example usage
+        const card1 = createCard('coach1', 'My name is coach1. I excel at ... ');
+        const card2 = createCard('coach2', 'My name is coach2. I excel at ... ');
+        const card3 = createCard('coach3', 'My name is coach3. I excel at ... ');
+        const card4 = createCard('coach4', 'My name is coach4. I excel at ... ');
+        const card5 = createCard('coach5', 'My name is coach5. I excel at ... ');
+        const card6 = createCard('coach6', 'My name is coach6. I excel at ... ');
+        const card7 = createCard('coach7', 'My name is coach7. I excel at ... ');
+        const card8 = createCard('coach8', 'My name is coach8. I excel at ... ');
+
+        cardContainer.appendChild(card1);
+        cardContainer.appendChild(card2);
+        cardContainer.appendChild(card3);
+        cardContainer.appendChild(card4);
+        cardContainer.appendChild(card5);
+        cardContainer.appendChild(card6);
+        cardContainer.appendChild(card7);
+        cardContainer.appendChild(card8);
+          
 
         // Add event listeners to handle mouse up event
         document.addEventListener('mouseup', function() {
@@ -362,11 +406,12 @@ function runScheduling() {
         // const parsedList = JSON.parse(schedulingList);
 
         // Add event listener to the button to log the active cells
-        document.getElementById('get-active-cells').addEventListener('click', function() {
-            console.log(getActiveCells());
-        });
+        // document.getElementById('get-active-cells').addEventListener('click', function() {
+        //     console.log(getActiveCells());
+        // });
 
         document.getElementById('compare').addEventListener('click', function() {
+          console.log(getActiveCells());
           findOverlap();
         })
 }

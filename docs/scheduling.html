@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width initial-scale=1">
     <title>Calendar Chart</title>
     <style>
         body {
@@ -10,19 +10,52 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            max-height: 100vh;
+            max-width: 100vw;
         }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            max-width: 95vw; /* adjust the width to your liking */
+            margin: 0 auto;
+        }
+
+        #get-active-cells, #compare {
+            height: 30px;
+        }
+
         .calendar-container {
-            position: relative;
-            margin-bottom: 20px;
+            flex-basis: 45%; /* adjust the width of the calendar container */
+            margin-right: 20px;
+            position: relative; /* Add this */
+        }
+        .button-container {
+            position: absolute; /* Add this */
+            top: 97.5%; /* Move the buttons below the calendar */
+            left: 0%; /* Align the buttons to the right side */
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .right-sidebar {
+            flex-basis: 45%; /* adjust the width of the right sidebar */
+            background-color: #f0f0f0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            overflow-y: auto;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
         }
         .calendar {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            grid-auto-rows: minmax(25px, auto);
-            gap: 1px;
+            grid-template-columns: repeat(7, 12vh);
+            grid-auto-rows: 1fr;
+            gap: 0px;
             background-color: #444;
-            transform: scale(0.65); /* Increase the chart size by 30% */
-            transform-origin: top left;
         }
         .calendar .header {
             background-color: #333;
@@ -50,22 +83,54 @@
         #get-active-cells {
             margin: 20px auto; /* Center the button and add some margin */
         }
+        .cardButton {
+            float: right;
+            margin-top: -45px;
+            height: 24px;
+            max-width: 75px;
+        }
+
+        .card-container {            
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
-    <div class="calendar-container">
-        <div class="calendar">
-            <div class="header">Sunday</div>
-            <div class="header">Monday</div>
-            <div class="header">Tuesday</div>
-            <div class="header">Wednesday</div>
-            <div class="header">Thursday</div>
-            <div class="header">Friday</div>
-            <div class="header">Saturday</div>
+    <div class="container">
+        <div class="calendar-container">
+            <div class="calendar-wrapper">
+                <div class="calendar">
+                    <div class="header">Sunday</div>
+                    <div class="header">Monday</div>
+                    <div class="header">Tuesday</div>
+                    <div class="header">Wednesday</div>
+                    <div class="header">Thursday</div>
+                    <div class="header">Friday</div>
+                    <div class="header">Saturday</div>
+                </div>
+                <div class="button-container">
+                    <button id="get-active-cells">Get Active Cells</button>
+                    <button id="compare">compare</button>
+                </div>
+            </div>
+        </div>
+        <div class="right-sidebar">
+            <div id="card-container"></div>
         </div>
     </div>
-    <button id="get-active-cells">Get Active Cells</button>
-    <button id="compare">compare</button>
+    
     <script src="login.js"></script>
     <script src="fetchId.js"></script>
 </body>

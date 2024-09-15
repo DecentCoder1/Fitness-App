@@ -185,7 +185,7 @@ app.post("/save-scheduling", async (req, res) => {
     // Update the document by ObjectId
     const updateResult = await collection.updateOne(
       { _id: new ObjectId(userId) },
-      { $set: { timeslots: schedulingList } } // Replace with the new exercises data
+      { $set: { timeslots: schedulingList } } // Replace with the new scheduling list
     );
     console.log('Update Result:', updateResult);
   } catch (error) {
@@ -193,7 +193,6 @@ app.post("/save-scheduling", async (req, res) => {
   } finally {
     await client.close();
     console.log('Connection closed');
-    // adding client.close() here would make it not be able to compare
   }
 });
 
@@ -242,3 +241,5 @@ app.post('/find-overlap', async (req, res) => {
 // 15% top 85% bottom, top for search and bottom right shows list of coaches refer to crimson notes: https://app.crimsoneducation.org/session/1646759/agenda
 // list all coaches on the side (make unavailable coaches unschedulable - alternate solution to ^)
 // card style with coach name, description, schedule, and scrollable
+// make scrollable list with booking history in a new page
+// landing page/user page for website --> keep simple and can search up
