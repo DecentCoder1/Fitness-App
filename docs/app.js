@@ -115,7 +115,6 @@ app.get('/composition', (req, res) => {
 });
 
 app.get('/scheduling', (req, res) => {
-  console.log(path.join(__dirname));
   res.sendFile(path.join(__dirname, 'scheduling.html'));
 });
 
@@ -129,7 +128,7 @@ app.post('/submitSignup', async (req, res) => {
   try {
     const hashedPassword = bcrypt.hashSync(password, 10);
     const cursor = req.db.collection("logins");
-    await cursor.insertOne({ email: email, name: fullName, password: hashedPassword, userType: coach ? "coach" : "user" });
+    await cursor.insertOne({ email: email, name: fullName, password: hashedPassword, isCoach: coach ? "coach" : "user" });
     res.redirect('/');
   } catch (error) {
     console.error('Error during signup:', error);
@@ -168,6 +167,33 @@ app.post("/save-exercises", async (req, res) => {
       console.log('Connection closed');
     }
 });
+
+app.post('/getUserType', async (req, res) => {
+
+  try {
+    await client.connect(); // Connect to your MongoDB
+    const database = client.db('fitness-app-data');
+    const collection = database.collection('logins');
+
+    let coachList = [];
+
+    // Find all users where isCoach is true and append their userId to coachList
+    await collection.find({ isCoach: true }).forEach(function(doc) {
+      coachList.push(doc._id.toString()); // Assuming _id is ObjectId, convert it to string
+    });
+
+    res.json({ coachList });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to fetch coaches' });
+  } finally {
+    await client.close();
+  }
+});
+
+
+
 
 app.post("/save-scheduling", async (req, res) => {
   const { userId, schedulingList } = req.body;
@@ -233,10 +259,32 @@ app.post('/find-overlap', async (req, res) => {
   }
 });
 
+app.post('/get-coaches-list', async (req, res) => {
+  // const { userId1, userId2 } = req.body;
 
-// can let user choose trainer and schedule a time, and also the other way around
+  try {
+    await client.connect();
+    const database = client.db('fitness-app-data');
+    const collection = database.collection('logins');
+
+    let cards = []
+    // Fetch scheduling lists for both users
+    await collection.find({ isCoach: true }).forEach(function(doc) {
+      cards.push(doc.name, doc.description)
+    })
+    cardsArr = [cards];
+    res.json({ cards: cardsArr });
+
+  } catch (error) {
+    console.error('Error finding overlaps:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    await client.close();
+  }
+});
+
+
 // create flow for pages
-// make scheduling.html into a new page where its standalone
 // user can choose time and it will show the list of coaches on the side
 // 15% top 85% bottom, top for search and bottom right shows list of coaches refer to crimson notes: https://app.crimsoneducation.org/session/1646759/agenda
 // list all coaches on the side (make unavailable coaches unschedulable - alternate solution to ^)

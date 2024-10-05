@@ -270,6 +270,37 @@ async function updatePreference(chosen) {
 
 function runScheduling() {
   console.log(getId());
+  async function checkIfCoach() {
+  try {
+    const response = await fetch('/getUserType', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    const coachList = data.coachList; // Get the list of coaches' userIds
+
+    const currentUserId = window.userData.userId; // Assuming you have user's userId stored
+
+    // Check if current user is in the coach list
+    if (coachList.includes(currentUserId)) {
+      // Apply CSS changes for coach
+      document.querySelector('.right-sidebar').style.display = 'none';
+      document.getElementById('compare').style.display = 'none';
+    }
+
+  } catch (error) {
+    console.error('Error fetching user type:', error);
+  }
+}
+
+checkIfCoach();
+
+
 
   const calendar = document.querySelector('.calendar');
 
@@ -354,24 +385,51 @@ function runScheduling() {
             return card;
         }
 
-        // Example usage
-        const card1 = createCard('coach1', 'My name is coach1. I excel at ... ');
-        const card2 = createCard('coach2', 'My name is coach2. I excel at ... ');
-        const card3 = createCard('coach3', 'My name is coach3. I excel at ... ');
-        const card4 = createCard('coach4', 'My name is coach4. I excel at ... ');
-        const card5 = createCard('coach5', 'My name is coach5. I excel at ... ');
-        const card6 = createCard('coach6', 'My name is coach6. I excel at ... ');
-        const card7 = createCard('coach7', 'My name is coach7. I excel at ... ');
-        const card8 = createCard('coach8', 'My name is coach8. I excel at ... ');
+        async function fetchAndDisplayCoaches() {
+          try {
+            const response = await fetch('/get-coaches-list', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
 
-        cardContainer.appendChild(card1);
-        cardContainer.appendChild(card2);
-        cardContainer.appendChild(card3);
-        cardContainer.appendChild(card4);
-        cardContainer.appendChild(card5);
-        cardContainer.appendChild(card6);
-        cardContainer.appendChild(card7);
-        cardContainer.appendChild(card8);
+            const data = await response.json();
+            console.log(data);
+            // Assuming `data` is an array of arrays where each sub-array contains [name, description]
+            const cardContainer = document.getElementById('card-container'); // Ensure you have an element with this ID
+              data.cards.forEach(([name, description]) => {
+                const card = createCard(name, description)
+                cardContainer.appendChild(card);
+              });
+          } catch (error) {
+            console.error('Error for list1:', error);
+          }
+        }
+
+        fetchAndDisplayCoaches();
+
+
+        // Example usage
+        // const card1 = createCard('coach1', 'My name is coach1. I excel at ... ');
+        // const card2 = createCard('coach2', 'My name is coach2. I excel at ... ');
+        // const card3 = createCard('coach3', 'My name is coach3. I excel at ... ');
+        // const card4 = createCard('coach4', 'My name is coach4. I excel at ... ');
+        // const card5 = createCard('coach5', 'My name is coach5. I excel at ... ');
+        // const card6 = createCard('coach6', 'My name is coach6. I excel at ... ');
+        // const card7 = createCard('coach7', 'My name is coach7. I excel at ... ');
+        // const card8 = createCard('coach8', 'My name is coach8. I excel at ... ');
+
+        // cardContainer.appendChild(card1);
+        // cardContainer.appendChild(card2);
+        // cardContainer.appendChild(card3);
+        // cardContainer.appendChild(card4);
+        // cardContainer.appendChild(card5);
+        // cardContainer.appendChild(card6);
+        // cardContainer.appendChild(card7);
+        // cardContainer.appendChild(card8);
           
 
         // Add event listeners to handle mouse up event
@@ -412,6 +470,8 @@ function runScheduling() {
 
         document.getElementById('compare').addEventListener('click', function() {
           console.log(getActiveCells());
-          findOverlap();
+          setTimeout(function() {
+            findOverlap();
+          }, 0);
         })
 }
