@@ -22,11 +22,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname)); // Use the root directory for views
 
+// Connect to MongoDB once and reuse the connection
+async function connectToDatabase() {
+  if (!client.topology || !client.topology.isConnected()) {
+    await client.connect();
+  }
+  return client.db("fitness-app-data");
+}
+
 // Middleware to handle database connection
 app.use(async (req, res, next) => {
-    await client.connect();
-    req.db = client.db("fitness-app-data");
-    next();
+  req.db = await connectToDatabase();
+  next();
 });
 
 const authenticateToken = (req, res, next) => {
@@ -139,40 +146,33 @@ app.post('/submitSignup', async (req, res) => {
 app.post("/save-exercises", async (req, res) => {
   const { userId, excerciseList } = req.body;
   
-    try {
-      await client.connect();
-      console.log('Connected to MongoDB');
-  
-      const database = client.db('fitness-app-data'); // Replace with your database name
-      const collection = database.collection('logins'); // Replace with your collection name
-  
-      // Example ObjectId string
-      const objectId = new ObjectId(userId);
+  try {
+    const database = await connectToDatabase();
+    const collection = database.collection('logins');
 
-      // Find the document by ObjectId
-      const user = await collection.findOne({ _id: objectId });
-      console.log('User:', user);
-  
-      // Update the document by ObjectId
-      const updateResult = await collection.updateOne(
-        { _id: objectId },
-        { $set: { exercises: excerciseList } } // Replace with the new exercises data
-      );
-      console.log('Update Result:', updateResult);
-  
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      await client.close();
-      console.log('Connection closed');
-    }
+    // Example ObjectId string
+    const objectId = new ObjectId(userId);
+
+    // Find the document by ObjectId
+    const user = await collection.findOne({ _id: objectId });
+    console.log('User:', user);
+
+    // Update the document by ObjectId
+    const updateResult = await collection.updateOne(
+      { _id: objectId },
+      { $set: { exercises: excerciseList } } // Replace with the new exercises data
+    );
+    console.log('Update Result:', updateResult);
+
+  } catch (error) {
+    console.error('Error:', error);
+  }
 });
 
 app.post('/getUserType', async (req, res) => {
 
   try {
-    await client.connect(); // Connect to your MongoDB
-    const database = client.db('fitness-app-data');
+    const database = await connectToDatabase();
     const collection = database.collection('logins');
 
     let coachList = [];
@@ -187,8 +187,6 @@ app.post('/getUserType', async (req, res) => {
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to fetch coaches' });
-  } finally {
-    await client.close();
   }
 });
 
@@ -199,14 +197,8 @@ app.post("/save-scheduling", async (req, res) => {
   const { userId, schedulingList } = req.body;
 
   try {
-    await client.connect();
-    console.log('Connected to MongoDB');
-
-    const database = client.db('fitness-app-data'); // Replace with your database name
-    const collection = database.collection('logins'); // Replace with your collection name
-
-    // Example ObjectId string
-    console.log(userId);
+    const database = await connectToDatabase();
+    const collection = database.collection('logins');
 
     // Update the document by ObjectId
     const updateResult = await collection.updateOne(
@@ -216,9 +208,6 @@ app.post("/save-scheduling", async (req, res) => {
     console.log('Update Result:', updateResult);
   } catch (error) {
     console.error('Error:', error);
-  } finally {
-    await client.close();
-    console.log('Connection closed');
   }
 });
 
@@ -230,11 +219,9 @@ app.post('/find-overlap', async (req, res) => {
   const { userId1, userId2 } = req.body;
 
   try {
-    await client.connect();
-    const database = client.db('fitness-app-data');
+    const database = await connectToDatabase();
     const collection = database.collection('logins');
 
-    // Fetch scheduling lists for both users
     const user1 = await collection.findOne({ _id: new ObjectId(userId1) });
     const user2 = await collection.findOne({ _id: new ObjectId(userId2) });
 
@@ -243,7 +230,6 @@ app.post('/find-overlap', async (req, res) => {
 
     const overlaps = [];
 
-    // Compare the lists day by day
     for (let i = 0; i < schedulingList1.length; i++) {
       const dayOverlap = schedulingList1[i].filter(timeSlot => schedulingList2[i].includes(timeSlot));
       overlaps.push(dayOverlap);
@@ -254,32 +240,23 @@ app.post('/find-overlap', async (req, res) => {
   } catch (error) {
     console.error('Error finding overlaps:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-  } finally {
-    await client.close();
   }
 });
 
 app.post('/get-coaches-list', async (req, res) => {
-  // const { userId1, userId2 } = req.body;
-
   try {
-    await client.connect();
-    const database = client.db('fitness-app-data');
+    const database = await connectToDatabase();
     const collection = database.collection('logins');
 
-    let cards = []
-    // Fetch scheduling lists for both users
+    let cards = [];
     await collection.find({ isCoach: true }).forEach(function(doc) {
-      cards.push(doc.name, doc.description)
-    })
-    cardsArr = [cards];
-    res.json({ cards: cardsArr });
+      cards.push([doc.name, doc.description, doc._id.toString()]);
+    });
+    res.json({ cards });
 
   } catch (error) {
     console.error('Error finding overlaps:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-  } finally {
-    await client.close();
   }
 });
 
