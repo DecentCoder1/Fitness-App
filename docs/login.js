@@ -1,5 +1,3 @@
-const { get } = require("mongoose");
-
 if (typeof window !== 'undefined') {
   document.addEventListener("DOMContentLoaded", function() {
     const currentPath = window.location.pathname;

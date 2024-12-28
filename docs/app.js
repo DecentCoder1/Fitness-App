@@ -268,3 +268,8 @@ app.post('/get-coaches-list', async (req, res) => {
 // card style with coach name, description, schedule, and scrollable
 // make scrollable list with booking history in a new page
 // landing page/user page for website --> keep simple and can search up
+
+// potentially save coaches schedule on the frontend since fetching from database on a responsive page becomes really slow
+// maybe add booking confirmation page (and with notes for the coach)
+// try to fix all scheduling issues
+// https://fullcalendar.io/docs/initialize-globals
