@@ -1,0 +1,61 @@
+.DS_Store
+node_modules/
+.env
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Compiled source
+*.out
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+Thumbs.db
+Desktop.ini
+
+# Build files
+dist/
+build/
+coverage/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs and databases
+*.sqlite3
+*.db
+
+debug/
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test coverage
+.nyc_output/
+coverage/
+
+# Application specific
+yarn-debug.log
+yarn-error.log
+npm-debug.log
