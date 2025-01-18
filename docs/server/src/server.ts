@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
 import authRoutes from './routes/auth';
-import userRoutes from './routes/user';
+import userRoutes from './routes/userRoutes';
 import bookingRoutes from './routes/booking'; // Import booking routes
 
 // Load environment variables
