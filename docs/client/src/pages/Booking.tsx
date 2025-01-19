@@ -64,7 +64,7 @@ const Bookings: React.FC = () => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      height="100vh"
+      height="100%"
       sx={{
         background: 'linear-gradient(to right, #f3f4f6, #e5e7eb)',
         p: 4,
@@ -83,7 +83,7 @@ const Bookings: React.FC = () => {
       </Typography>
 
       {/* Calendar */}
-      <Box mb={4} sx={{ width: '100%', maxWidth: '600px' }}>
+      <Box mb={4} sx={{ paddingLeft: '40%', paddingRight: '20%', width: '100%', maxWidth: '600px' }}>
         <Calendar onChange={setSelectedDate} value={selectedDate} />
       </Box>
 
