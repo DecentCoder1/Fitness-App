@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface User {
-  id: string;
+  _id: string; // Updated to `_id`
   email: string;
   fullName: string;
   isCoach: boolean;

@@ -21,7 +21,7 @@ const Login: React.FC = () => {
       console.log(response.data.user);
   
       localStorage.setItem('user', JSON.stringify(response.data.user)); // Persist to localStorage
-      navigate('/');
+      navigate('/profile');
     } catch (err: any) {
       console.error('Login failed:', err.response?.data || err.message);
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');

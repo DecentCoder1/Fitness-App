@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import LandingPage from './pages/LandingPage';
 import Profile from './pages/Profile';
 import Booking from './pages/Booking';
+import Availability from './pages/Availability'; // Import Availability page
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/booking" element={<Booking />} />
+        <Route path="/availability" element={<Availability />} /> {/* New Route */}
       </Routes>
     </Router>
   );

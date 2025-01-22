@@ -1,12 +1,10 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const LandingPage: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
-      <Header />
       <Box
         component="main"
         flexGrow={1}
@@ -26,9 +24,9 @@ const LandingPage: React.FC = () => {
         <Button
           variant="contained"
           color="primary"
-          href="/profile"
+          href="/login"
         >
-          Go to Profile
+          Start
         </Button>
       </Box>
       <Footer />

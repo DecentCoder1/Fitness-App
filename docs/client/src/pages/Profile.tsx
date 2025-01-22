@@ -1,24 +1,14 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Avatar,
-  Card,
-  CardContent,
-  Grid,
-  IconButton,
-  Button,
-  Container,
-} from '@mui/material';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Box, Typography, Avatar, Button, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import { useUser } from '../context/UserContext'; // Import user context
+import { useUser } from '../context/UserContext';
+import UpcomingSessions from '../components/UpcomingSessions'; // Import the new component
+import ExerciseList from '../components/ExerciseList'; // Import the ExerciseList component
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUser(); // Get user data from context
+  const { user } = useUser();
 
   const exercises = [
     { id: 1, name: 'Pushups', completed: true },
@@ -37,7 +27,7 @@ const Profile: React.FC = () => {
       <Header />
       <Container
         sx={{
-          mt: 2, // Add margin-top to prevent content from touching the header
+          mt: 2,
           width: '100%',
           maxWidth: 'none',
           padding: 0,
@@ -62,7 +52,7 @@ const Profile: React.FC = () => {
             alignItems="center"
             justifyContent="center"
             borderRight="1px solid #e0e0e0"
-            py={4}
+            p={4}
           >
             <Avatar
               alt={user?.fullName || 'User Avatar'}
@@ -84,17 +74,11 @@ const Profile: React.FC = () => {
               "Fitness is not about being better than someone else, it's about being better than you used to be."
             </Typography>
           </Box>
-  
+
           {/* Right Content Section */}
           <Box flexBasis="70%" px={4} py={4}>
             {/* Top Summary Section */}
-            <Box
-              mb={3}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              gap={2}
-            >
+            <Box mb={3} display="flex" alignItems="center" justifyContent="space-between" gap={2}>
               <Box
                 p={2}
                 flex={1}
@@ -111,8 +95,7 @@ const Profile: React.FC = () => {
                   You’ve completed 15 workouts this month and logged 30 hours of exercise. Keep up the great work!
                 </Typography>
               </Box>
-  
-              {/* Booking Button */}
+
               <Button
                 variant="contained"
                 color="primary"
@@ -126,57 +109,17 @@ const Profile: React.FC = () => {
                 Book a Slot
               </Button>
             </Box>
-  
-            {/* Bottom Exercise Cards Section */}
-            <Typography variant="h6" fontWeight="bold" mb={2}>
-              Your Exercises
-            </Typography>
-            <Grid container spacing={2}>
-              {exercises.map((exercise) => (
-                <Grid item xs={12} sm={6} md={4} key={exercise.id}>
-                  <Card
-                    sx={{
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-                      transition: 'transform 0.2s ease-in-out',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
-                      },
-                    }}
-                  >
-                    <CardContent>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <FitnessCenterIcon color="primary" />
-                        <IconButton>
-                          {exercise.completed ? (
-                            <CheckCircleIcon sx={{ color: '#10b981' }} />
-                          ) : (
-                            <CheckCircleIcon sx={{ color: '#e5e7eb' }} />
-                          )}
-                        </IconButton>
-                      </Box>
-                      <Typography variant="h6" fontWeight="bold" mt={1}>
-                        {exercise.name}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {exercise.completed ? 'Completed' : 'Not Completed'}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
+
+            {/* Upcoming Sessions Section */}
+            <UpcomingSessions />
+
+            {/* Exercises Section */}
+            <ExerciseList exercises={exercises} />
           </Box>
         </Box>
       </Container>
     </Box>
   );
-  
 };
 
 export default Profile;

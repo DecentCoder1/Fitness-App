@@ -14,6 +14,24 @@ export const getAllUsers = async (_req: Request, res: Response) => {
   }
 };
 
+// Get a specific user by ID
+export const getUserById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json(user); // Return the user data (coach details)
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 export const getUser = async (req: Request, res: Response) => {
   const { email } = req.query;
 
@@ -87,7 +105,7 @@ export const login = async (req: Request, res: Response) => {
     res.json({
       message: 'Login successful!',
       user: {
-        id: user._id,
+        _id: user._id,
         email: user.email,
         fullName: user.fullName,
         isCoach: user.isCoach,

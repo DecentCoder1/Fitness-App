@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, Grid, Paper, Container } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, Grid, Paper, Container, CircularProgress, Snackbar, Alert } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useUser } from '../context/UserContext';
+import Header from '../components/Header';
 import api from '../services/api';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
+interface Coach {
+  _id: string;
+  fullName: string;
+  email: string;
+}
+
 const Bookings: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Value>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [availableCoaches, setAvailableCoaches] = useState<Coach[]>([]);
+  const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
+  const [loadingCoaches, setLoadingCoaches] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
   const { user } = useUser();
 
   const timeSlots = Array.from({ length: 24 }, (_, i) => {
@@ -18,7 +32,6 @@ const Bookings: React.FC = () => {
     return `${hour}:00 - ${hour}:59`;
   });
 
-  // Function to get the current time in Taiwan (UTC+8)
   const getCurrentTaiwanTime = () => {
     const now = new Date();
     const taiwanOffset = 8 * 60; // Taiwan is UTC+8
@@ -26,18 +39,15 @@ const Bookings: React.FC = () => {
     return new Date(utc + taiwanOffset * 60000);
   };
 
-  // Function to check if a time slot is disabled
   const isTimeSlotDisabled = (time: string): boolean => {
     const currentTaiwanTime = getCurrentTaiwanTime();
     const today = new Date(currentTaiwanTime.toDateString());
     const selected = new Date((selectedDate as Date).toDateString());
 
-    // If the selected date is in the past
     if (selected < today) {
       return true;
     }
 
-    // If the selected date is today, disable past times
     if (selected.getTime() === today.getTime()) {
       const [hour] = time.split(':');
       const slotTime = new Date(selected);
@@ -46,7 +56,6 @@ const Bookings: React.FC = () => {
       return slotTime < currentTaiwanTime;
     }
 
-    // Future dates are not disabled
     return false;
   };
 
@@ -56,27 +65,59 @@ const Bookings: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchAvailableCoaches = async () => {
+      if (!selectedTime || !selectedDate) return;
+
+      setLoadingCoaches(true);
+      try {
+        const response = await api.get('/availability', {
+          params: {
+            date: (selectedDate as Date).toISOString(),
+            timeSlot: selectedTime,
+          },
+        });
+
+        setAvailableCoaches(response.data); // Response contains coach details
+      } catch (error) {
+        console.error('Error fetching available coaches:', error);
+        setAvailableCoaches([]);
+      } finally {
+        setLoadingCoaches(false);
+      }
+    };
+
+    fetchAvailableCoaches();
+  }, [selectedDate, selectedTime]);
+
   const handleConfirmBooking = async () => {
-    if (selectedDate && selectedTime && user?.email) {
+    if (selectedDate && selectedTime && user?.email && selectedCoach?._id) {
       const bookingData = {
-        email: user.email,
+        userId: user._id,  // Ensure userId is used here, not email
         date: selectedDate instanceof Date ? selectedDate.toISOString() : null,
         timeSlot: selectedTime,
+        coachId: selectedCoach._id,  // Send the selected coachId
       };
-  
+
       try {
-        const response = await api.post('/bookings', bookingData); // Using axios instance
-        alert(response.data.message || 'Booking confirmed!');
+        const response = await api.post('/booking', bookingData);
+        setSnackbarMessage(response.data.message || 'Booking confirmed!');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
       } catch (error: any) {
         console.error('Error confirming booking:', error);
         const errorMessage =
           error.response?.data?.error || 'Failed to confirm booking. Please try again.';
-        alert(errorMessage);
+        setSnackbarMessage(errorMessage);
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
       }
     } else {
-      alert('Please select a date, a time slot, and ensure you are logged in.');
+      setSnackbarMessage('Please select a date, a time slot, a coach, and ensure you are logged in.');
+      setSnackbarSeverity('error');
+      setOpenSnackbar(true);
     }
-  };  
+  };
 
   return (
     <Box
@@ -85,12 +126,11 @@ const Bookings: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
         background: 'linear-gradient(to right, #1e293b, #3b82f6)',
       }}
     >
       <Container
-        maxWidth="lg"
+        maxWidth="xl"
         sx={{
           backgroundColor: '#ffffff',
           borderRadius: 4,
@@ -98,82 +138,43 @@ const Bookings: React.FC = () => {
           padding: 4,
         }}
       >
-        <Typography variant="h4" fontWeight="bold" textAlign="center" mb={2} color="primary">
+        {/* Header Component */}
+        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999, background: 'rgba(0, 0, 0, 0.6)' }}>
+          <Header />
+        </Box>
+        <Typography variant="h4" fontWeight="bold" textAlign="center" mb={4} color="primary">
           Book Your Time Slot
-        </Typography>
-        <Typography variant="body1" textAlign="center" mb={4} color="text.secondary">
-          Select a date and an available time slot for your booking.
-        </Typography>
-
-        <Typography
-          variant="body2"
-          mb={2}
-          textAlign="center"
-          color="text.secondary"
-          sx={{ fontStyle: 'italic' }}
-        >
-          Booking as: <strong>{user?.email || 'Guest'}</strong>
         </Typography>
 
         <Grid container spacing={4}>
           {/* Calendar Section */}
-          <Grid item xs={12} md={6}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexDirection: 'column',
-                height: '100%',
-              }}
-            >
-              <Box
-                sx={{
-                  width: '100%',
-                  maxWidth: 500,
-                  padding: 3,
-                  borderRadius: 4,
-                  transform: 'scale(1.1)',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  margin: '0 auto',
-                }}
-              >
-                <Calendar
-                  onChange={setSelectedDate}
-                  value={selectedDate}
-                  className="custom-calendar"
-                />
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" fontWeight="bold" textAlign="center" mb={2}>
+              Select a Date
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+              <Box sx={{ width: '100%', maxWidth: 350, padding: 2, borderRadius: 4 }}>
+                <Calendar onChange={setSelectedDate} value={selectedDate} className="custom-calendar" />
               </Box>
-              <Typography
-                variant="body2"
-                mt={2}
-                color="text.secondary"
-                textAlign="center"
-                sx={{ fontStyle: 'italic' }}
-              >
-                Use the calendar to select your desired date.
-              </Typography>
             </Box>
           </Grid>
 
           {/* Time Slots Section */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Typography variant="h6" fontWeight="bold" textAlign="center" mb={2}>
               Select a Time Slot
             </Typography>
             <Box
               sx={{
-                maxHeight: 500,
-                overflowY: 'auto',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)', // 4 columns
+                gap: 2, // Spacing between items
+                padding: 2,
                 border: '1px solid #e5e7eb',
                 borderRadius: 2,
-                padding: 2,
                 backgroundColor: '#f9fafb',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
+                maxHeight: 500,
+                overflowY: 'auto',
               }}
             >
               {timeSlots.map((time) => (
@@ -194,18 +195,9 @@ const Bookings: React.FC = () => {
                       ? '#ffffff'
                       : '#000000',
                     fontWeight: selectedTime === time ? 'bold' : 'normal',
-                    border: selectedTime === time
-                      ? '2px solid #2563eb'
-                      : '1px solid #e5e7eb',
-                    transition: 'all 0.3s ease-in-out',
-                    fontSize: '1.2rem',
                     borderRadius: '8px',
-                    boxShadow: selectedTime === time
-                      ? '0px 4px 15px rgba(0, 0, 0, 0.2)'
-                      : 'none',
                     '&:hover': {
-                      backgroundColor:
-                        selectedTime === time ? '#2563eb' : isTimeSlotDisabled(time) ? '#d1d5db' : '#f3f4f6',
+                      backgroundColor: selectedTime === time ? '#2563eb' : '#f3f4f6',
                     },
                   }}
                   onClick={() => handleTimeSelect(time)}
@@ -216,8 +208,60 @@ const Bookings: React.FC = () => {
               ))}
             </Box>
           </Grid>
+
+          {/* Available Coaches Section */}
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" fontWeight="bold" textAlign="center" mb={2}>
+              Select a Coach
+            </Typography>
+            {loadingCoaches ? (
+              <Box display="flex" justifyContent="center">
+                <CircularProgress />
+              </Box>
+            ) : availableCoaches.length > 0 ? (
+              <Box
+                sx={{
+                  maxHeight: 500,
+                  overflowY: 'auto',
+                  padding: 2,
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 2,
+                  backgroundColor: '#f9fafb',
+                }}
+              >
+                {availableCoaches.map((coach) => (
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      padding: 2,
+                      textAlign: 'center',
+                      mb: 1,
+                      backgroundColor: selectedCoach?._id === coach._id ? '#e5e7eb' : '#ffffff',  // Highlight selected coach
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: selectedCoach?._id === coach._id ? '#d1d5db' : '#e5e7eb',
+                      },
+                    }}
+                    key={coach._id}
+                    onClick={() => setSelectedCoach(coach)}  // Ensure this sets the selected coach
+                  >
+                    <Typography variant="h6">{coach.fullName}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {coach.email}
+                    </Typography>
+                  </Paper>
+                ))}
+              </Box>
+            ) : (
+              <Typography textAlign="center" color="text.secondary">
+                No coaches available for the selected time slot.
+              </Typography>
+            )}
+          </Grid>
         </Grid>
 
+        {/* Confirm Button */}
         <Box display="flex" justifyContent="center" mt={4}>
           <Button
             variant="contained"
@@ -230,11 +274,33 @@ const Bookings: React.FC = () => {
               '&:hover': { backgroundColor: '#2563eb' },
             }}
             onClick={handleConfirmBooking}
+            disabled={!selectedCoach}  // Disable if no coach is selected
           >
             Confirm Booking
           </Button>
         </Box>
       </Container>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{
+          vertical: 'top', // Positions the snackbar at the top of the screen
+          horizontal: 'right', // Aligns the snackbar to the right of the screen
+        }}
+        sx={{
+          zIndex: 9999,  // Ensures it's on top of other elements
+        }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
