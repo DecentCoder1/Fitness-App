@@ -37,8 +37,7 @@ const Profile: React.FC = () => {
       <Header />
       <Container
         sx={{
-          mt: 0,
-          mb: 0,
+          mt: 2, // Add margin-top to prevent content from touching the header
           width: '100%',
           maxWidth: 'none',
           padding: 0,
@@ -50,7 +49,7 @@ const Profile: React.FC = () => {
           display="flex"
           flexDirection="row"
           sx={{
-            minHeight: 'calc(100vh - 64px)', // Adjust height considering header height
+            minHeight: 'calc(100vh - 64px - 16px)', // Adjust height to account for header and margin
             background: 'linear-gradient(to right, #f8fafc, #e2e8f0)',
           }}
         >
@@ -85,7 +84,7 @@ const Profile: React.FC = () => {
               "Fitness is not about being better than someone else, it's about being better than you used to be."
             </Typography>
           </Box>
-
+  
           {/* Right Content Section */}
           <Box flexBasis="70%" px={4} py={4}>
             {/* Top Summary Section */}
@@ -112,7 +111,7 @@ const Profile: React.FC = () => {
                   You’ve completed 15 workouts this month and logged 30 hours of exercise. Keep up the great work!
                 </Typography>
               </Box>
-
+  
               {/* Booking Button */}
               <Button
                 variant="contained"
@@ -127,7 +126,7 @@ const Profile: React.FC = () => {
                 Book a Slot
               </Button>
             </Box>
-
+  
             {/* Bottom Exercise Cards Section */}
             <Typography variant="h6" fontWeight="bold" mb={2}>
               Your Exercises
@@ -177,6 +176,7 @@ const Profile: React.FC = () => {
       </Container>
     </Box>
   );
+  
 };
 
 export default Profile;

@@ -1,26 +1,9 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import { createBooking, getAllBookings } from '../controllers/bookingControllers';
 
 const router = express.Router();
 
-// Booking Route
-router.post('/', (req: Request, res: Response) => {
-  const { email, date, timeSlot } = req.body;
-
-  if (!email || !date || !timeSlot) {
-    return res.status(400).json({ error: 'All fields are required: email, date, and timeSlot.' });
-  }
-
-  console.log(`Booking received:
-  - Email: ${email}
-  - Date: ${date}
-  - Time Slot: ${timeSlot}`);
-
-  res.status(200).json({ message: 'Booking successfully logged.' });
-});
-
-router.get('/', (req: Request, res: Response) => {
-  
-  res.status(200).json({ message: 'Booking successfully logged.' });
-});
+router.post('/', createBooking); // Create booking
+router.get('/', getAllBookings); // Retrieve all bookings
 
 export default router;

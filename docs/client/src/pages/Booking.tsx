@@ -3,6 +3,7 @@ import { Box, Typography, Button, Grid, Paper, Container } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useUser } from '../context/UserContext';
+import api from '../services/api';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -62,30 +63,20 @@ const Bookings: React.FC = () => {
         date: selectedDate instanceof Date ? selectedDate.toISOString() : null,
         timeSlot: selectedTime,
       };
-
+  
       try {
-        const response = await fetch('http://localhost:5000/bookings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(bookingData),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Error ${response.status}: ${errorText}`);
-        }
-
-        const data = await response.json();
-        alert(data.message || 'Booking confirmed!');
-      } catch (error) {
-        alert('Failed to confirm booking. Please try again.');
+        const response = await api.post('/bookings', bookingData); // Using axios instance
+        alert(response.data.message || 'Booking confirmed!');
+      } catch (error: any) {
+        console.error('Error confirming booking:', error);
+        const errorMessage =
+          error.response?.data?.error || 'Failed to confirm booking. Please try again.';
+        alert(errorMessage);
       }
     } else {
       alert('Please select a date, a time slot, and ensure you are logged in.');
     }
-  };
+  };  
 
   return (
     <Box
