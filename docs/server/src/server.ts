@@ -2,9 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
-import authRoutes from './routes/auth';
-import userRoutes from './routes/userRoutes';
-import bookingRoutes from './routes/booking'; // Import booking routes
+import apiRoutes from './routes'; // Import the centralized routes file
 
 // Load environment variables
 dotenv.config();
@@ -26,10 +24,8 @@ app.use(express.json());
   }
 })();
 
-// Routes
-app.use('/auth', authRoutes);
-app.use('/user', userRoutes);
-app.use('/bookings', bookingRoutes); // Add booking routes
+// Use the centralized routes with /api prefix
+app.use('/api', apiRoutes);
 
 // Error Handling Middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

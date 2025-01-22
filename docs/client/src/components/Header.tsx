@@ -9,14 +9,6 @@ const Header: React.FC = () => {
     navigate('/profile');
   };
 
-  const goToLogin = () => {
-    navigate('/login');
-  };
-
-  const goToSignup = () => {
-    navigate('/signup');
-  };
-
   const goToBooking = () => {
     navigate('/booking');
   };
@@ -27,12 +19,6 @@ const Header: React.FC = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Fitness App
         </Typography>
-        <Button color="inherit" size="large" sx={{marginLeft: 1, marginRight: 1}} onClick={goToLogin}>
-          Login
-        </Button>
-        <Button color="inherit" size="large" sx={{marginLeft: 1, marginRight: 1}} onClick={goToSignup}>
-          Signup
-        </Button>
         <Button color="inherit" size="large" sx={{marginLeft: 1, marginRight: 1}} onClick={goToBooking}>
           Booking
         </Button>

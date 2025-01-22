@@ -7,11 +7,11 @@ export interface IUser extends Document {
   isCoach: boolean;
 }
 
-const UserSchema: Schema = new Schema({
+const UserModel: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   fullName: { type: String, required: true },
   password: { type: String, required: true },
   isCoach: { type: Boolean, required: true },
 });
 
-export default mongoose.model<IUser>('User', UserSchema);
+export default mongoose.model<IUser>('User', UserModel);

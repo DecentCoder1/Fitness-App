@@ -1,19 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import { signup, login } from '../controllers/userControllers';
 
 const router = Router();
 
-// Public route: User profile
-router.get('/profile', (req: Request, res: Response) => {
-  res.json({
-    message: 'User profile accessed successfully!',
-    // Mocked user data
-    user: {
-      id: '12345',
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      isCoach: false,
-    },
-  });
-});
+// Signup Route
+router.post('/signup', signup);
+
+// Login Route
+router.post('/login', login);
 
 export default router;

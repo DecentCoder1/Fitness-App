@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Card, CardContent } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Import Link
 import api from '../services/api';
 import { useUser } from '../context/UserContext';
 
@@ -13,13 +13,13 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/user/login', { email, password }); // Updated endpoint
       console.log('Login successful:', response.data);
-
+  
       // Save user data in context
       setUser(response.data.user);
       console.log(response.data.user);
-
+  
       localStorage.setItem('user', JSON.stringify(response.data.user)); // Persist to localStorage
       navigate('/');
     } catch (err: any) {
@@ -27,7 +27,7 @@ const Login: React.FC = () => {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     }
   };
-
+  
   return (
     <Box
       display="flex"
@@ -89,6 +89,12 @@ const Login: React.FC = () => {
           >
             Login
           </Button>
+          <Typography variant="body2" textAlign="center" mt={2}>
+            Don't have an account?{' '}
+            <Link to="/signup" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 'bold' }}>
+              Sign Up Now
+            </Link>
+          </Typography>
         </CardContent>
       </Card>
     </Box>
